@@ -1,17 +1,27 @@
-/** Class that determines whether or not a year is a leap year.
- *  @author YOUR NAME HERE
+/**
+ * Class that determines whether or not a year is a leap year.
+ * 
+ * @author Fu Shiming
+ 
  */
 public class LeapYear {
 
-    /** Calls isLeapYear to print correct statement.
-     *  @param  year to be analyzed
+     * 
+     * /** Calls isLeapYear to print correct state
+     * @param  year to be analyzed
+     *  */
+     pu 
+     * ic static boolean isLeapYear(int year){ 
+     *             
+     *                 return (year % 400 == 0) || (year % 4 =
+     * 
+     *             /** Calls isLeapYear to print correct statement.
+     * @param year to be analyzed
      */
-    private static void checkLeapYear(int year) {
-        if (isLeapYear(year)) {
-            System.out.printf("%d is a leap year.\n", year);
-        } else {
-            System.out.printf("%d is not a leap year.\n", year);
-        }
+    pate sttic vi chckeaYer(intya)  
+
+         
+    } else { }
     }
 
     /** Must be provided an integer as a command line argument ARGS. */
