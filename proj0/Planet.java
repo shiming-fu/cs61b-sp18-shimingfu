@@ -23,9 +23,7 @@ public class Planet {
     }
     public double calcDistance(Planet p)
     {
-        double r;
-        r=Math.sqrt((this.xxPos-p.xxPos)*(this.xxPos-p.xxPos)+(this.yyPos-p.yyPos)*(this.yyPos-p.yyPos));
-        return r;
+        return Math.sqrt((xxPos-p.xxPos)*(xxPos-p.xxPos)+(yyPos-p.yyPos)*(yyPos-p.yyPos));
     }
     public double calcForceExertedBy(Planet p)
     {
