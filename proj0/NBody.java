@@ -3,7 +3,7 @@ public class NBody{
     {
         double r;
         In in = new In(filename);
-        int firstItemInFile = in.readInt();
+        int num = in.readInt();
         r = in.readDouble();
         return r;
     }
@@ -12,10 +12,10 @@ public class NBody{
         double xxPos,xxVel,yyPos,yyVel,mass;
         String imgFileName;
         In in = new In(filename);
-        int firstItemInFile = in.readInt();
+        int num = in.readInt();
         double secondItemInFile = in.readDouble();
         Planet[]p=new Planet[5];
-        for(int i=0; i<5;i++)
+        for(int i=0; i<num;i++)
         {
             xxPos = in.readDouble();
             yyPos = in.readDouble();
