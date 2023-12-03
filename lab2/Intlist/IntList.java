@@ -74,15 +74,20 @@ public class IntList {
 
     /** DO NOT MODIFY ANYTHING ABOVE THIS LINE! */
 
-
     /**
      * Returns a list consisting of the elements of A followed by the
      * *  elements of B.  May modify items of A. Don't use 'new'.
      */
 
     public static IntList dcatenate(IntList A, IntList B) {
+        if(A.rest==null)
+        {
+            A.rest = B;
+            return A;
+        }
+        dcatenate(A.rest,B);
+        return A;
         //TODO:  fill in method
-        return null;
     }
 
     /**
@@ -90,8 +95,12 @@ public class IntList {
      * * elements of B.  May NOT modify items of A.  Use 'new'.
      */
     public static IntList catenate(IntList A, IntList B) {
+        if(A==null)
+        {
+            return B;
+        }
+        return new IntList(A.first, catenate(A.rest,B));
         //TODO:  fill in method
-        return null;
     }
 
 
