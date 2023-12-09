@@ -1,7 +1,6 @@
-/*** first part of project 1
- * Deque implemented by Linked List
- * 
- * @author Shiming Fu
+/**  first part of project1A.
+ *   Deque implemented by Linked List
+ *  @author ShimingFu
  */
 public class LinkedListDeque<T> {
     public class Node {
@@ -76,7 +75,7 @@ public class LinkedListDeque<T> {
     }
 
     public T get(int index) {
-        if (index > size) {
+        if (index >= size) {
             return null;
         }
         Node temp = sentinel;
