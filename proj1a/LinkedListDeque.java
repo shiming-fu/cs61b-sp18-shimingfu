@@ -1,28 +1,34 @@
-/**  first part of project1A.
- *   Deque implemented by Linked List
- *  @author ShimingFu
- */
+
 public class LinkedListDeque<T> {
+    /** inner class Node. */
     public class Node {
+        /** the item stored on this node. */
         private T item;
+        /** the Node before this Node. **/
         private Node pre;
+        /** the Node after this Node. **/
         private Node next;
 
+        /** constructor for Node. */
         public Node(T n, Node ppre, Node nnext) {
             item = n;
-            ppre = pre;
+            pre = ppre;
             next = nnext;
         }
 
+        /** constructor for Node.(especially for sentinel node). */
         public Node(Node ppre, Node nnext) {
             pre = ppre;
             next = nnext;
         }
     }
 
+    /** sentinel node. */
     private Node sentinel;
+    /** size of the deque. */
     private int size;
 
+    /** constructor for deque. */
     public LinkedListDeque() {
         sentinel = new Node(null, null);
         sentinel.pre = sentinel;
@@ -66,6 +72,8 @@ public class LinkedListDeque<T> {
     public T removeLast() {
         if (size == 0) {
             return null;
+        } else if (sentinel.pre == sentinel) {
+            return null;
         }
         T ret = sentinel.pre.item;
         sentinel.pre.pre.next = sentinel;
@@ -78,11 +86,11 @@ public class LinkedListDeque<T> {
         if (index >= size) {
             return null;
         }
-        Node temp = sentinel;
+        Node ptr = sentinel;
         for (int i = 0; i <= index; i++) {
-            temp = temp.next;
+            ptr = ptr.next;
         }
-        return temp.item;
+        return ptr.item;
     }
 
     private T getRecursiveHelp(Node start, int index) {
@@ -94,17 +102,17 @@ public class LinkedListDeque<T> {
     }
 
     public T getRecursive(int index) {
-        if (index > size) {
+        if (index >= size) {
             return null;
         }
-        return getRecursiveHelp(sentinel, index - 1);
+        return getRecursiveHelp(sentinel.next, index);
     }
 
     public void printDeque() {
-        Node temp = sentinel.next;
-        while (temp != sentinel) {
-            System.out.print(temp.item + " ");
-            temp = temp.next;
+        Node ptr = sentinel.next;
+        while (ptr != sentinel) {
+            System.out.print(ptr.item + " ");
+            ptr = ptr.next;
         }
     }
 }
