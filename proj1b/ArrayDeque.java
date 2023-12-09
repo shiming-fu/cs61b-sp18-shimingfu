@@ -1,4 +1,4 @@
-public class ArrayDeque<T>implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T> {
     private T[] array;
     private int size;
     private int length;
@@ -20,7 +20,6 @@ public class ArrayDeque<T>implements Deque<T> {
     public int size() {
         return size;
     }
-
 
     private int minusOne(int index) {
         if (index == 0) {
@@ -77,7 +76,7 @@ public class ArrayDeque<T>implements Deque<T> {
         size++;
     }
 
-   @Override
+    @Override
     public void addLast(T item) {
         if (size == length - 1) {
             grow();
@@ -87,7 +86,7 @@ public class ArrayDeque<T>implements Deque<T> {
         size++;
     }
 
-   @Override
+    @Override
     public T removeFirst() {
         if (length > 16 && length / size >= 4) {
             shrink();

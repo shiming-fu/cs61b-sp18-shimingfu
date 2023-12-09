@@ -1,5 +1,5 @@
 
-public class LinkedListDeque<T>implements Deque<T> {
+public class LinkedListDeque<T> implements Deque<T> {
     /** inner class Node. */
     public class Node {
         /** the item stored on this node. */
