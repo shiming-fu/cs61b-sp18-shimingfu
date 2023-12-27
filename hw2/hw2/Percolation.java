@@ -50,8 +50,8 @@ public class Percolation {
         for (int[] surrounding : surroundings) {
             int adjacentrow = row + surrounding[0];
             int adjacentcol = col + surrounding[1];
-            if (adjacentrow > 0 && adjacentrow < size) {
-                if (adjacentcol > 0 && adjacentcol < size) {
+            if (adjacentrow >= 0 && adjacentrow < size) {
+                if (adjacentcol >= 0 && adjacentcol < size) {
                     uf.union(xytoID(row, col), xytoID(adjacentrow, adjacentcol));
                     ufExcludeBottom.union(xytoID(row, col), xytoID(adjacentrow, adjacentcol));
                 }
@@ -66,7 +66,7 @@ public class Percolation {
 
     public boolean isFull(int row, int col) {
         validate(row, col);
-        return ufExcludeBottom.connected(xytoID(row, col),top);
+        return ufExcludeBottom.connected(xytoID(row, col), top);
     } // is the site (row, col) full?
 
     public int numberOfOpenSites() {
