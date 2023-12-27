@@ -12,13 +12,13 @@ public class Percolation {
     private int numOfOpenSites = 0;
     private int[][] surroundings = new int[][] {{0, 1 }, {0, -1 }, {1, 0 }, {-1, 0 } };
 
-    private int xytoID(int row, int col) {
+    private int xyTo1D(int row, int col) {
         return row * size + col + 1;
     }
 
     public Percolation(int N) {
         if (N <= 0) {
-            throw new java.lang.IndexOutOfBoundsException();
+            throw new IllegalArgumentException();
         }
         grid = new boolean[N][N];
         size = N;
@@ -41,21 +41,27 @@ public class Percolation {
             numOfOpenSites += 1;
         }
         if (row == 0) {
-            uf.union(xytoID(row, col), top);
-            ufExcludeBottom.union(xytoID(row, col), top);
+            uf.union(xyTo1D(row, col), top);
+            ufExcludeBottom.union(xyTo1D(row, col), top);
         }
         if (row == size - 1) {
-            uf.union(xytoID(row, col), bottom);
+            uf.union(xyTo1D(row, col), bottom);
         }
-        for (int[] surrounding : surroundings) {
-            int adjacentrow = row + surrounding[0];
-            int adjacentcol = col + surrounding[1];
-            if (adjacentrow >= 0 && adjacentrow < size) {
-                if (adjacentcol >= 0 && adjacentcol < size) {
-                    uf.union(xytoID(row, col), xytoID(adjacentrow, adjacentcol));
-                    ufExcludeBottom.union(xytoID(row, col), xytoID(adjacentrow, adjacentcol));
-                }
-            }
+        if (row > 0 && isOpen(row - 1, col)) {
+            uf.union(xyTo1D(row, col), xyTo1D(row - 1, col));
+            ufExcludeBottom.union(xyTo1D(row, col), xyTo1D(row - 1, col));
+        }
+        if (row < size - 1 && isOpen(row + 1, col)) {
+            uf.union(xyTo1D(row, col), xyTo1D(row + 1, col));
+            ufExcludeBottom.union(xyTo1D(row, col), xyTo1D(row + 1, col));
+        }
+        if (col > 0 && isOpen(row, col - 1)) {
+            uf.union(xyTo1D(row, col), xyTo1D(row, col - 1));
+            ufExcludeBottom.union(xyTo1D(row, col), xyTo1D(row, col - 1));
+        }
+        if (col < size - 1 && isOpen(row, col + 1)) {
+            uf.union(xyTo1D(row, col), xyTo1D(row, col + 1));
+            ufExcludeBottom.union(xyTo1D(row, col), xyTo1D(row, col + 1));
         }
     } // open the site (row, col) if it is not open already
 
@@ -66,7 +72,7 @@ public class Percolation {
 
     public boolean isFull(int row, int col) {
         validate(row, col);
-        return ufExcludeBottom.connected(xytoID(row, col), top);
+        return ufExcludeBottom.connected(xyTo1D(row, col), top);
     } // is the site (row, col) full?
 
     public int numberOfOpenSites() {
