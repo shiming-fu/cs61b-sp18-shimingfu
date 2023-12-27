@@ -2,7 +2,6 @@ package hw2;
 
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
-import org.junit.Test;
 
 public class PercolationStats {
     private int numtrials;
@@ -10,9 +9,10 @@ public class PercolationStats {
 
     public PercolationStats(int N, int T, PercolationFactory pf) {
         if (N <= 0 || T <= 0) {
-            throw new IndexOutOfBoundsException();
+            throw new IllegalArgumentException();
         }
         numtrials = T;
+        fractions = new double[T];
         int totalSites = N * N;
         for (int i = 0; i < T; i++) {
             int numOpenedSites = 0;
@@ -25,7 +25,7 @@ public class PercolationStats {
                     numOpenedSites++;
                 }
             }
-            fractions[i] = numOpenedSites / totalSites;
+            fractions[i] = (double) numOpenedSites / totalSites;
         }
 
     } // perform T independent experiments on an N-by-N grid

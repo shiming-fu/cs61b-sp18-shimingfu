@@ -12,7 +12,7 @@ public class Percolation {
     private int numOfOpenSites = 0;
     private int[][] surroundings = new int[][] {{0, 1 }, {0, -1 }, {1, 0 }, {-1, 0 } };
 
-    private int XYtoID(int row, int col) {
+    private int xytoID(int row, int col) {
         return row * size + col + 1;
     }
 
@@ -29,7 +29,7 @@ public class Percolation {
     } // create N-by-N grid, with all sites initially blocked
 
     private void validate(int row, int col) {
-        if (row < 0 || row > size || col < 0 || col > size) {
+        if (row < 0 || row >= size || col < 0 || col >= size) {
             throw new IndexOutOfBoundsException();
         }
     }
@@ -41,19 +41,19 @@ public class Percolation {
             numOfOpenSites += 1;
         }
         if (row == 0) {
-            uf.union(XYtoID(row, col), top);
-            ufExcludeBottom.union(XYtoID(row, col), top);
+            uf.union(xytoID(row, col), top);
+            ufExcludeBottom.union(xytoID(row, col), top);
         }
         if (row == size - 1) {
-            uf.union(XYtoID(row, col), bottom);
+            uf.union(xytoID(row, col), bottom);
         }
         for (int[] surrounding : surroundings) {
             int adjacentrow = row + surrounding[0];
             int adjacentcol = col + surrounding[1];
             if (adjacentrow > 0 && adjacentrow < size) {
                 if (adjacentcol > 0 && adjacentcol < size) {
-                    uf.union(XYtoID(row, col), XYtoID(adjacentrow, adjacentcol));
-                    ufExcludeBottom.union(XYtoID(row, col), XYtoID(adjacentrow, adjacentcol));
+                    uf.union(xytoID(row, col), xytoID(adjacentrow, adjacentcol));
+                    ufExcludeBottom.union(xytoID(row, col), xytoID(adjacentrow, adjacentcol));
                 }
             }
         }
@@ -66,7 +66,7 @@ public class Percolation {
 
     public boolean isFull(int row, int col) {
         validate(row, col);
-        return ufExcludeBottom.connected(row, col);
+        return ufExcludeBottom.connected(xytoID(row, col),top);
     } // is the site (row, col) full?
 
     public int numberOfOpenSites() {
