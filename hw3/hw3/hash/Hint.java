@@ -9,4 +9,4 @@ public class Hint {
             x = x * 256;
         }
     }
-} 
+}
