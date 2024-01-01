@@ -1,7 +1,7 @@
 package lab11.graphs;
 
 /**
- *  @author Josh Hug
+ * @author Josh Hug
  */
 public class TrivialMazeExplorer extends MazeExplorer {
     public TrivialMazeExplorer(Maze maze) {
@@ -18,4 +18,3 @@ public class TrivialMazeExplorer extends MazeExplorer {
         }
     }
 }
-

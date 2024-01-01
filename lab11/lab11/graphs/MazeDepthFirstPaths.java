@@ -1,19 +1,19 @@
 package lab11.graphs;
 
 /**
- *  @author Josh Hug
+ * @author Josh Hug
  */
 public class MazeDepthFirstPaths extends MazeExplorer {
-    /* Inherits public fields:
-    public int[] distTo;
-    public int[] edgeTo;
-    public boolean[] marked;
-    */
+    /*
+     * Inherits public fields:
+     * public int[] distTo;
+     * public int[] edgeTo;
+     * public boolean[] marked;
+     */
     private int s;
     private int t;
     private boolean targetFound = false;
     private Maze maze;
-
 
     public MazeDepthFirstPaths(Maze m, int sourceX, int sourceY, int targetX, int targetY) {
         super(m);
@@ -54,4 +54,3 @@ public class MazeDepthFirstPaths extends MazeExplorer {
         dfs(s);
     }
 }
-

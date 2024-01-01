@@ -11,7 +11,6 @@ public abstract class MazeExplorer extends Observable {
     protected boolean[] marked;
     protected Maze maze;
 
-
     /**
      * Notify all Observers of a change.
      */

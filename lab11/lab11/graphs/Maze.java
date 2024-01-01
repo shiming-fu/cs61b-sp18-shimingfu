@@ -88,7 +88,6 @@ public class Maze implements Observer {
         return (y - 1) * N + (x - 1);
     }
 
-
     // returns true if wall exists
     private boolean wallExists(int x, int y, String s) {
         int tx = targetX(x, s);
@@ -225,7 +224,6 @@ public class Maze implements Observer {
         west = new boolean[N + 2][N + 2];
     }
 
-
     // generate the maze
     private void generateSingleGapMaze(int x, int y, boolean[][] marked) {
 
@@ -283,7 +281,6 @@ public class Maze implements Observer {
         generateSingleGapMaze(1, 1, marked);
     }
 
-
     private void generatePopenSolvableMaze(double pOpen) {
         // initialize all walls as present
         north = new boolean[N + 2][N + 2];
@@ -295,7 +292,6 @@ public class Maze implements Observer {
                 north[x][y] = east[x][y] = south[x][y] = west[x][y] = true;
             }
         }
-
 
         for (int x = 1; x < N + 1; x += 1) {
             for (int y = 1; y < N + 1; y += 1) {
@@ -393,7 +389,6 @@ public class Maze implements Observer {
         }
     }
 
-
     private void drawEdges(int i, MazeExplorer me) {
         int x = toX(i);
         int y = toY(i);
@@ -452,27 +447,23 @@ public class Maze implements Observer {
         StdDraw.show();
     }
 
-
-    // a test client
-   /* public static void main(String[] args) {
+    public static void main(String[] args) {
         int N = Integer.parseInt(args[0]);
         int rseed = Integer.parseInt(args[1]);
 
         Maze maze = new Maze(N, rseed, 0.48, MazeType.POPEN_SOLVABLE);
         StdDraw.show(0);
         maze.draw();
-//        MazeExplorer mdfp = new MazeAStarPath(maze, 4, 4, N, N);
+        // MazeExplorer mdfp = new MazeAStarPath(maze, 4, 4, N, N);
         MazeExplorer mdfp = new MazeCycles(maze);
         mdfp.solve();
-    }*/
+    }
 
-
-    private int N;                 // dimension of maze
-    private boolean[][] north;     // is there a wall to north of cell i, j
+    private int N; // dimension of maze
+    private boolean[][] north; // is there a wall to north of cell i, j
     private boolean[][] east;
     private boolean[][] south;
     private boolean[][] west;
     private static Random rgen;
     private static int DRAW_DELAY_MS = 50;
 }
-
