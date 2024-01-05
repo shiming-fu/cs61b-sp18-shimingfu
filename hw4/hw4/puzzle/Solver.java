@@ -66,7 +66,7 @@ public class Solver {
         return path;
     }
 
-    int searchedCount() {
+    private int searchedCount() {
         return searchedCnt;
     }
 }

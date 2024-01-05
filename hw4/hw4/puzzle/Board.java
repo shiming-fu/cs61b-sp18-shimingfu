@@ -100,6 +100,7 @@ public class Board implements WorldState {
         return manhattan();
     }
 
+    @Override
     public boolean equals(Object y) {
         if (this == y) {
             return true;
@@ -119,6 +120,10 @@ public class Board implements WorldState {
             }
         }
         return true;
+    }
+    @Override
+    public int hashCode() {
+        return this.hashCode();
     }
 
     public String toString() {
