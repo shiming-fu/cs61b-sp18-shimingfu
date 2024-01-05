@@ -10,7 +10,6 @@ public class Percolation {
     private WeightedQuickUnionUF uf;
     private WeightedQuickUnionUF ufExcludeBottom;
     private int numOfOpenSites = 0;
-    private int[][] surroundings = new int[][] {{0, 1 }, {0, -1 }, {1, 0 }, {-1, 0 } };
 
     private int xyTo1D(int row, int col) {
         return row * size + col + 1;
