@@ -1,12 +1,16 @@
 package byog.Core;
 
 public class Position {
-    final int x;
-    final int y;
+    int x;
+    int y;
 
     public Position(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+    Position()
+    {
+
     }
 
     /**
@@ -17,4 +21,24 @@ public class Position {
         int middleY = des.y - this.y;
         return new Position((int) (this.x + 0.5 * middleX), (int) (this.y + 0.5 * middleY));
     }
+    public Position up()
+    {
+        return new Position(x,y+1);
+    }
+    public Position down()
+    {
+        return new Position(x,y-1);
+    }
+    public Position right()
+    {
+        return new Position(x+1,y);
+    }
+    public Position left()
+    {
+        return new Position(x-1,y);
+    }
+
+
+
+
 }
