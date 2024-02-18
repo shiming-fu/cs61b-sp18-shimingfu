@@ -109,7 +109,7 @@ public class TERenderer {
         StdDraw.clear(Color.BLACK);
         StdDraw.setPenColor(Color.white);
         StdDraw.setFont(fTitle);
-        StdDraw.text(midWidth,midHeight,title);
+        StdDraw.text(midWidth,midHeight/2*3,title);
         for(int i = 0; i < options.length; i++)
         {
             StdDraw.text(midWidth,midHeight+ 4 * (1 - i),options[i]);
