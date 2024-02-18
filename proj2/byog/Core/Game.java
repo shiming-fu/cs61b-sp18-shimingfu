@@ -192,16 +192,42 @@ public class Game {
      **/
 
 
-
-    private TETile[][] generateWorld(Random random) {
+    private TETile[][] generateWorld(Random random)
+    {
+        initWorld();
         Connection cons = new Connection();
-        cons.addFirstCon(size(), random);
-        for (int i = 0; i < cons.nCon; i++) {
-            Position p = cons.connections[i];
-            Size size = ;
-            Room room = new Room(p, size);
+        cons.addFirstCon(size,random);
+        Position c = cons.connections.poll();
+        boolean isFirstConnected = false;
+        Position tmp = c;
+        int failTimes = 0;
+        while(c != null && failTimes<MAXFAILTIME)
+        {
+            Room room = new Room();
+            Position[] news = room.addRandomRoom(random,c,world);
+            if(news == null)
+            {
+                failTimes++;
+            }
+            else{
+                for(int i = 0;i<news.length;i++)
+                {
+                    cons.connections.offer(news[i]);
+                }
+            }
+            c = cons.connections.poll();
+            if(tmp.equals(c))
+            {
+                isFirstConnected = true;
+            }
         }
-        return null;
+        if(!isFirstConnected)
+        {
+            world[tmp.x][tmp.y]=Tileset.WALL;
+        }
+    player.setRandomPlayer(world,random);
+    player.addplayer(world);
+    return world;
     }
 
     static int getOption(String input)
