@@ -137,8 +137,8 @@ public class Game {
      */
     private void saveGame() {
         try {
-            FileOutputStream fileout1 = new FileOutputStream("savePlayer.ser");
-            FileOutputStream fileout2 = new FileOutputStream("saveWorld.ser");
+            FileOutputStream fileout1 = new FileOutputStream("./savePlayer.ser");
+            FileOutputStream fileout2 = new FileOutputStream("./saveWorld.ser");
             ObjectOutputStream playerout = new ObjectOutputStream(fileout1);
             ObjectOutputStream worldOut = new ObjectOutputStream(fileout2);
             playerout.writeObject(player);
@@ -157,8 +157,8 @@ public class Game {
      */
     private TETile[][] loadGame() {
         try {
-            FileInputStream fileIn1 = new FileInputStream("savePlayer.ser");
-            FileInputStream fileIn2 = new FileInputStream("SaveWorld.ser");
+            FileInputStream fileIn1 = new FileInputStream("./savePlayer.ser");
+            FileInputStream fileIn2 = new FileInputStream("./SaveWorld.ser");
             ObjectInputStream playerIn = new ObjectInputStream(fileIn1);
             ObjectInputStream worldIn = new ObjectInputStream(fileIn2);
             world = (TETile[][]) worldIn.readObject();
