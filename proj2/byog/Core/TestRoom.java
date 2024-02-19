@@ -30,6 +30,7 @@ public class TestRoom {
         for (int i = 0; i < game.size().x; i++) {
             for (int j = 0; j < game.size().y; j++) {
                 assertEquals(exp[i][j].character(), game.world[i][j].character());
+
             }
         }
     }

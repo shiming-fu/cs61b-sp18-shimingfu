@@ -20,8 +20,11 @@ public class TestGame {
     @Test
         public void testGetOption()
     {
-        String input = "lrqwrqw423rqwr";
-        int exp = 1;
+        String input = "N543SWWWWAA";
+        int exp = 0;
+        assertEquals(exp, Game.getOption(input));
+        input = "lrqwrqw423rqwr";
+        exp = 1;
         assertEquals(exp, Game.getOption(input));
         input = "Lrqwrqwrqwr";
         exp = 1;

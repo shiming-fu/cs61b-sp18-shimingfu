@@ -112,6 +112,7 @@ public class TERenderer {
         StdDraw.text(midWidth,midHeight/2*3,title);
         for(int i = 0; i < options.length; i++)
         {
+            StdDraw.setFont(fOption);
             StdDraw.text(midWidth,midHeight+ 4 * (1 - i),options[i]);
         }
         StdDraw.show();

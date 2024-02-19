@@ -24,6 +24,11 @@ public class Door {
     /**
      * Return the random & proper position int world.
      */
+    void setRandomDoor (TETile[][] world,Random random)
+    {
+        pos = getRandomDoorPos(world, random);
+        world[pos.x][pos.y]=Tileset.LOCKED_DOOR;
+    }
     private Position getRandomDoorPos(TETile[][]world, Random random)
     {
         List<Position>pList = getValidPosList(world);

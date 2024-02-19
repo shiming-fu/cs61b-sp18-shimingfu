@@ -3,9 +3,9 @@ import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 import java.util.Random;
 
-public class Room {
+ public class Room {
     private Size size;
-    private Position pos;
+    private Position pos;//Left Bottom
     private static final int RMAX = 15;
     private static final int RMIN = 4;
     private static final int CMAX = 7;
@@ -27,7 +27,7 @@ public class Room {
     public void addRoom(TETile[][]world)
     {
         Position boundary = new Position(pos.x + size.x -1,pos.y+size.y-1);
-        // up and down
+        /* up and down */
         for(int i = pos.x; i <= boundary.x;i++)
         {
             world[i][pos.y] = Tileset.WALL;
@@ -40,9 +40,9 @@ public class Room {
             world[boundary.x][i] = Tileset.WALL;
         }
         /*middle*/
-        for(int i = pos.x + 1;i <= boundary.x-1; i++)
+        for(int i = pos.x + 1;i < boundary.x; i++)
         {
-            for(int j = pos.y + 1; j <= boundary.y-1; j++)
+            for(int j = pos.y + 1; j < boundary.y; j++)
             {
                 world[i][j] = Tileset.FLOOR;
             }
@@ -128,5 +128,6 @@ public class Room {
         }
         return false;
     }
+
 
 }

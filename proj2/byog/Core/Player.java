@@ -26,7 +26,7 @@ public class Player implements Serializable{
     /**
      *  Add Player to the world
      */
-    void addplayer(TETile[][] world)
+    void addPlayer(TETile[][] world)
     {
         if(world[pos.x][pos.y] == Tileset.WALL)
         {

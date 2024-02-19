@@ -16,7 +16,7 @@ public class Game {
     TETile[][] world;
     Door door;
     public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
+    public static final int HEIGHT = 40;
     public static final int MAXFAILTIME = 1000;
     private Size size = new Size(WIDTH,HEIGHT);
 
@@ -226,7 +226,8 @@ public class Game {
             world[tmp.x][tmp.y]=Tileset.WALL;
         }
     player.setRandomPlayer(world,random);
-    player.addplayer(world);
+    player.addPlayer(world);
+    door.setRandomDoor(world,random);
     return world;
     }
 
