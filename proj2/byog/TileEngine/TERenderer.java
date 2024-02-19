@@ -6,8 +6,10 @@ import java.awt.Color;
 import java.awt.Font;
 
 /**
- * Utility class for rendering tiles. You do not need to modify this file. You're welcome
- * to, but be careful. We strongly recommend getting everything else working before
+ * Utility class for rendering tiles. You do not need to modify this file.
+ * You're welcome
+ * to, but be careful. We strongly recommend getting everything else working
+ * before
  * messing with this renderer, unless you're trying to do something fancy like
  * allowing scrolling of the screen or tracking the player or something similar.
  */
@@ -19,11 +21,16 @@ public class TERenderer {
     private int yOffset;
 
     /**
-     * Same functionality as the other initialization method. The only difference is that the xOff
-     * and yOff parameters will change where the renderFrame method starts drawing. For example,
-     * if you select w = 60, h = 30, xOff = 3, yOff = 4 and then call renderFrame with a
-     * TETile[50][25] array, the renderer will leave 3 tiles blank on the left, 7 tiles blank
+     * Same functionality as the other initialization method. The only difference is
+     * that the xOff
+     * and yOff parameters will change where the renderFrame method starts drawing.
+     * For example,
+     * if you select w = 60, h = 30, xOff = 3, yOff = 4 and then call renderFrame
+     * with a
+     * TETile[50][25] array, the renderer will leave 3 tiles blank on the left, 7
+     * tiles blank
      * on the right, 4 tiles blank on the bottom, and 1 tile blank on the top.
+     * 
      * @param w width of the window in tiles
      * @param h height of the window in tiles.
      */
@@ -34,7 +41,7 @@ public class TERenderer {
         this.yOffset = yOff;
         StdDraw.setCanvasSize(width * TILE_SIZE, height * TILE_SIZE);
         Font font = new Font("Monaco", Font.BOLD, TILE_SIZE - 2);
-        StdDraw.setFont(font);      
+        StdDraw.setFont(font);
         StdDraw.setXscale(0, width);
         StdDraw.setYscale(0, height);
 
@@ -45,15 +52,19 @@ public class TERenderer {
     }
 
     /**
-     * Initializes StdDraw parameters and launches the StdDraw window. w and h are the
-     * width and height of the world in number of tiles. If the TETile[][] array that you
+     * Initializes StdDraw parameters and launches the StdDraw window. w and h are
+     * the
+     * width and height of the world in number of tiles. If the TETile[][] array
+     * that you
      * pass to renderFrame is smaller than this, then extra blank space will be left
-     * on the right and top edges of the frame. For example, if you select w = 60 and
+     * on the right and top edges of the frame. For example, if you select w = 60
+     * and
      * h = 30, this method will create a 60 tile wide by 30 tile tall window. If
      * you then subsequently call renderFrame with a TETile[50][25] array, it will
      * leave 10 tiles blank on the right side and 5 tiles blank on the top side. If
      * you want to leave extra space on the left or bottom instead, use the other
      * initializatiom method.
+     * 
      * @param w width of the window in tiles
      * @param h height of the window in tiles.
      */
@@ -62,25 +73,32 @@ public class TERenderer {
     }
 
     /**
-     * Takes in a 2d array of TETile objects and renders the 2d array to the screen, starting from
+     * Takes in a 2d array of TETile objects and renders the 2d array to the screen,
+     * starting from
      * xOffset and yOffset.
      *
-     * If the array is an NxM array, then the element displayed at positions would be as follows,
+     * If the array is an NxM array, then the element displayed at positions would
+     * be as follows,
      * given in units of tiles.
      *
-     *              positions   xOffset |xOffset+1|xOffset+2| .... |xOffset+world.length
-     *                     
-     * startY+world[0].length   [0][M-1] | [1][M-1] | [2][M-1] | .... | [N-1][M-1]
-     *                    ...    ......  |  ......  |  ......  | .... | ......
-     *               startY+2    [0][2]  |  [1][2]  |  [2][2]  | .... | [N-1][2]
-     *               startY+1    [0][1]  |  [1][1]  |  [2][1]  | .... | [N-1][1]
-     *                 startY    [0][0]  |  [1][0]  |  [2][0]  | .... | [N-1][0]
+     * positions xOffset |xOffset+1|xOffset+2| .... |xOffset+world.length
+     * 
+     * startY+world[0].length [0][M-1] | [1][M-1] | [2][M-1] | .... | [N-1][M-1]
+     * ... ...... | ...... | ...... | .... | ......
+     * startY+2 [0][2] | [1][2] | [2][2] | .... | [N-1][2]
+     * startY+1 [0][1] | [1][1] | [2][1] | .... | [N-1][1]
+     * startY [0][0] | [1][0] | [2][0] | .... | [N-1][0]
      *
-     * By varying xOffset, yOffset, and the size of the screen when initialized, you can leave
-     * empty space in different places to leave room for other information, such as a GUI.
-     * This method assumes that the xScale and yScale have been set such that the max x
-     * value is the width of the screen in tiles, and the max y value is the height of
+     * By varying xOffset, yOffset, and the size of the screen when initialized, you
+     * can leave
+     * empty space in different places to leave room for other information, such as
+     * a GUI.
+     * This method assumes that the xScale and yScale have been set such that the
+     * max x
+     * value is the width of the screen in tiles, and the max y value is the height
+     * of
      * the screen in tiles.
+     * 
      * @param world the 2D TETile[][] array to render
      */
     public void renderFrame(TETile[][] world) {
@@ -98,22 +116,22 @@ public class TERenderer {
         }
         StdDraw.show();
     }
-    public void showMenu()
-    {
+
+    public void showMenu() {
         int midWidth = width / 2;
         int midHeight = height / 2;
-        Font fTitle = new Font("Monaco",Font.BOLD,30);
-        Font fOption = new Font ("Monaco",Font.BOLD,20);
+        Font fTitle = new Font("Monaco", Font.BOLD, 30);
+        Font fOption = new Font("Monaco", Font.BOLD, 20);
         String title = "CS61B : THE GAME";
-        String[] options = {"NEW GAME(N)","LOAD GAME(L)","QUIT(:Q)"};
+        String[] options = { "NEW GAME(N)", "LOAD GAME(L)", "QUIT(:Q)" };
         StdDraw.clear(Color.BLACK);
         StdDraw.setPenColor(Color.white);
         StdDraw.setFont(fTitle);
-        StdDraw.text(midWidth,midHeight/2*3,title);
-        for(int i = 0; i < options.length; i++)
-        {
-            StdDraw.setFont(fOption);
-            StdDraw.text(midWidth,midHeight+ 4 * (1 - i),options[i]);
+        StdDraw.text(midWidth, midHeight / 2 * 3, title);
+        StdDraw.setFont(fOption);
+        for (int i = 0; i < options.length; i++) {
+
+            StdDraw.text(midWidth, midHeight + 4 * (1 - i), options[i]);
         }
         StdDraw.show();
     }

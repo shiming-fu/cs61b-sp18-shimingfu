@@ -1,19 +1,15 @@
 package byog.Core;
 
-public class Position extends Coordinate{
-    int x;
-    int y;
+public class Position extends Coordinate {
 
     public Position(int x, int y) {
-        super(x,y);
+        super(x, y);
     }
-    Position()
-    {
+    Position() {
         super();
     }
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if(this == obj)
         {
             return true;

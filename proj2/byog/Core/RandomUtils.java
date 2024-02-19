@@ -10,7 +10,7 @@ import java.util.Random;
  * modify this file.
  * <p>
  * Adapted from https://introcs.cs.princeton.edu/java/22library/StdRandom.java.html
-*
+ *
  */
 public class RandomUtils {
 
@@ -27,7 +27,8 @@ public class RandomUtils {
      * Returns a random integer uniformly in [0, n).
      *
      * @param n number of possible integers
-     * @return a random integer uniformly between 0 (inclusive) and {@code n} (exclusive)
+     * @return a random integer uniformly between 0 (inclusive) and {@code n}
+     *         (exclusive)
      * @throws IllegalArgumentException if {@code n <= 0}
      */
     public static int uniform(Random random, int n) {
@@ -37,12 +38,12 @@ public class RandomUtils {
         return random.nextInt(n);
     }
 
-
     /**
      * Returns a random long integer uniformly in [0, n).
      *
      * @param n number of possible {@code long} integers
-     * @return a random long integer uniformly between 0 (inclusive) and {@code n} (exclusive)
+     * @return a random long integer uniformly between 0 (inclusive) and {@code n}
+     *         (exclusive)
      * @throws IllegalArgumentException if {@code n <= 0}
      */
     public static long uniform(Random random, long n) {
@@ -68,10 +69,9 @@ public class RandomUtils {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    //  STATIC METHODS BELOW RELY ON JAVA.UTIL.RANDOM ONLY INDIRECTLY VIA
-    //  THE STATIC METHODS ABOVE.
+    // STATIC METHODS BELOW RELY ON JAVA.UTIL.RANDOM ONLY INDIRECTLY VIA
+    // THE STATIC METHODS ABOVE.
     ///////////////////////////////////////////////////////////////////////////
-
 
     /**
      * Returns a random integer uniformly in [a, b).
@@ -110,8 +110,9 @@ public class RandomUtils {
      *
      * @param p the probability of returning {@code true}
      * @return {@code true} with probability {@code p} and
-     * {@code false} with probability {@code p}
-     * @throws IllegalArgumentException unless {@code 0} &le; {@code p} &le; {@code 1.0}
+     *         {@code false} with probability {@code p}
+     * @throws IllegalArgumentException unless {@code 0} &le; {@code p} &le;
+     *                                  {@code 1.0}
      */
     public static boolean bernoulli(Random random, double p) {
         if (!(p >= 0.0 && p <= 1.0)) {
@@ -125,7 +126,7 @@ public class RandomUtils {
      * probability 1/2.
      *
      * @return {@code true} with probability 1/2 and
-     * {@code false} with probability 1/2
+     *         {@code false} with probability 1/2
      */
     public static boolean bernoulli(Random random) {
         return bernoulli(random, 0.5);
@@ -135,7 +136,7 @@ public class RandomUtils {
      * Returns a random real number from a standard Gaussian distribution.
      *
      * @return a random real number from a standard Gaussian distribution
-     * (mean 0 and standard deviation 1).
+     *         (mean 0 and standard deviation 1).
      */
     public static double gaussian(Random random) {
         // use the polar form of the Box-Muller transform
@@ -147,7 +148,7 @@ public class RandomUtils {
         } while (r >= 1 || r == 0);
         return x * Math.sqrt(-2 * Math.log(r) / r);
 
-        // Remark:  y * Math.sqrt(-2 * Math.log(r) / r)
+        // Remark: y * Math.sqrt(-2 * Math.log(r) / r)
         // is an independent random gaussian
     }
 
@@ -158,7 +159,7 @@ public class RandomUtils {
      * @param mu    the mean
      * @param sigma the standard deviation
      * @return a real number distributed according to the Gaussian distribution
-     * with mean {@code mu} and standard deviation {@code sigma}
+     *         with mean {@code mu} and standard deviation {@code sigma}
      */
     public static double gaussian(Random random, double mu, double sigma) {
         return mu + sigma * gaussian(random);
@@ -170,8 +171,8 @@ public class RandomUtils {
      *
      * @param p the parameter of the geometric distribution
      * @return a random integer from a geometric distribution with success
-     * probability {@code p}; or {@code Integer.MAX_VALUE} if
-     * {@code p} is (nearly) equal to {@code 1.0}.
+     *         probability {@code p}; or {@code Integer.MAX_VALUE} if
+     *         {@code p} is (nearly) equal to {@code 1.0}.
      * @throws IllegalArgumentException unless {@code p >= 0.0} and {@code p <= 1.0}
      */
     public static int geometric(Random random, double p) {
@@ -223,7 +224,7 @@ public class RandomUtils {
      *
      * @param alpha shape parameter
      * @return a random real number from a Pareto distribution with shape
-     * parameter {@code alpha}
+     *         parameter {@code alpha}
      * @throws IllegalArgumentException unless {@code alpha > 0.0}
      */
     public static double pareto(Random random, double alpha) {
@@ -247,10 +248,12 @@ public class RandomUtils {
      *
      * @param probabilities the probability of occurrence of each integer
      * @return a random integer from a discrete distribution:
-     * {@code i} with probability {@code probabilities[i]}
+     *         {@code i} with probability {@code probabilities[i]}
      * @throws IllegalArgumentException if {@code probabilities} is {@code null}
-     * @throws IllegalArgumentException if sum of array entries is not (very nearly) equal to 1.0
-     * @throws IllegalArgumentException unless {@code probabilities[i] >= 0.0} for each index i
+     * @throws IllegalArgumentException if sum of array entries is not (very nearly)
+     *                                  equal to 1.0
+     * @throws IllegalArgumentException unless {@code probabilities[i] >= 0.0} for
+     *                                  each index i
      */
     public static int discrete(Random random, double[] probabilities) {
         if (probabilities == null) {
@@ -261,17 +264,18 @@ public class RandomUtils {
         for (int i = 0; i < probabilities.length; i++) {
             if (!(probabilities[i] >= 0.0)) {
                 throw new IllegalArgumentException("array entry " + i + " must be nonnegative: "
-                                                   + probabilities[i]);
+                        + probabilities[i]);
             }
             sum += probabilities[i];
         }
         if (sum > 1.0 + eps || sum < 1.0 - eps) {
             throw new IllegalArgumentException("sum of array entries does not approximately "
-                                               + "equal 1.0: " + sum);
+                    + "equal 1.0: " + sum);
         }
 
         // the for loop may not return a value when both r is (nearly) 1.0 and when the
-        // cumulative sum is less than 1.0 (as a result of floating-point roundoff error)
+        // cumulative sum is less than 1.0 (as a result of floating-point roundoff
+        // error)
         while (true) {
             double r = uniform(random);
             sum = 0.0;
@@ -289,11 +293,13 @@ public class RandomUtils {
      *
      * @param frequencies the frequency of occurrence of each integer
      * @return a random integer from a discrete distribution:
-     * i with probability proportional to frequencies[i]
+     *         i with probability proportional to frequencies[i]
      * @throws IllegalArgumentException if frequencies is null
      * @throws IllegalArgumentException if all array entries are 0
-     * @throws IllegalArgumentException if frequencies[i] is negative for any index i
-     * @throws IllegalArgumentException if sum of frequencies exceeds Integer.MAX_VALUE (2^31 - 1)
+     * @throws IllegalArgumentException if frequencies[i] is negative for any index
+     *                                  i
+     * @throws IllegalArgumentException if sum of frequencies exceeds
+     *                                  Integer.MAX_VALUE (2^31 - 1)
      */
     public static int discrete(Random random, int[] frequencies) {
         if (frequencies == null) {
@@ -303,7 +309,7 @@ public class RandomUtils {
         for (int i = 0; i < frequencies.length; i++) {
             if (frequencies[i] < 0) {
                 throw new IllegalArgumentException("array entry " + i + " must be nonnegative: "
-                                                   + frequencies[i]);
+                        + frequencies[i]);
             }
             sum += frequencies[i];
         }
@@ -335,7 +341,7 @@ public class RandomUtils {
      *
      * @param lambda the rate of the exponential distribution
      * @return a random real number from an exponential distribution with
-     * rate {@code lambda}
+     *         rate {@code lambda}
      * @throws IllegalArgumentException unless {@code lambda > 0.0}
      */
     public static double exp(Random random, double lambda) {
@@ -355,7 +361,7 @@ public class RandomUtils {
         validateNotNull(a);
         int n = a.length;
         for (int i = 0; i < n; i++) {
-            int r = i + uniform(random, n - i);     // between i and n-1
+            int r = i + uniform(random, n - i); // between i and n-1
             Object temp = a[i];
             a[i] = a[r];
             a[r] = temp;
@@ -372,7 +378,7 @@ public class RandomUtils {
         validateNotNull(a);
         int n = a.length;
         for (int i = 0; i < n; i++) {
-            int r = i + uniform(random, n - i);     // between i and n-1
+            int r = i + uniform(random, n - i); // between i and n-1
             double temp = a[i];
             a[i] = a[r];
             a[r] = temp;
@@ -389,7 +395,7 @@ public class RandomUtils {
         validateNotNull(a);
         int n = a.length;
         for (int i = 0; i < n; i++) {
-            int r = i + uniform(random, n - i);     // between i and n-1
+            int r = i + uniform(random, n - i); // between i and n-1
             int temp = a[i];
             a[i] = a[r];
             a[r] = temp;
@@ -406,7 +412,7 @@ public class RandomUtils {
         validateNotNull(a);
         int n = a.length;
         for (int i = 0; i < n; i++) {
-            int r = i + uniform(random, n - i);     // between i and n-1
+            int r = i + uniform(random, n - i); // between i and n-1
             char temp = a[i];
             a[i] = a[r];
             a[r] = temp;
@@ -420,14 +426,15 @@ public class RandomUtils {
      * @param lo the left endpoint (inclusive)
      * @param hi the right endpoint (exclusive)
      * @throws IllegalArgumentException if {@code a} is {@code null}
-     * @throws IllegalArgumentException unless {@code (0 <= lo) && (lo < hi) && (hi <= a.length)}
+     * @throws IllegalArgumentException unless
+     *                                  {@code (0 <= lo) && (lo < hi) && (hi <= a.length)}
      */
     public static void shuffle(Random random, Object[] a, int lo, int hi) {
         validateNotNull(a);
         validateSubarrayIndices(lo, hi, a.length);
 
         for (int i = lo; i < hi; i++) {
-            int r = i + uniform(random, hi - i);     // between i and hi-1
+            int r = i + uniform(random, hi - i); // between i and hi-1
             Object temp = a[i];
             a[i] = a[r];
             a[r] = temp;
@@ -441,14 +448,15 @@ public class RandomUtils {
      * @param lo the left endpoint (inclusive)
      * @param hi the right endpoint (exclusive)
      * @throws IllegalArgumentException if {@code a} is {@code null}
-     * @throws IllegalArgumentException unless {@code (0 <= lo) && (lo < hi) && (hi <= a.length)}
+     * @throws IllegalArgumentException unless
+     *                                  {@code (0 <= lo) && (lo < hi) && (hi <= a.length)}
      */
     public static void shuffle(Random random, double[] a, int lo, int hi) {
         validateNotNull(a);
         validateSubarrayIndices(lo, hi, a.length);
 
         for (int i = lo; i < hi; i++) {
-            int r = i + uniform(random, hi - i);     // between i and hi-1
+            int r = i + uniform(random, hi - i); // between i and hi-1
             double temp = a[i];
             a[i] = a[r];
             a[r] = temp;
@@ -462,14 +470,15 @@ public class RandomUtils {
      * @param lo the left endpoint (inclusive)
      * @param hi the right endpoint (exclusive)
      * @throws IllegalArgumentException if {@code a} is {@code null}
-     * @throws IllegalArgumentException unless {@code (0 <= lo) && (lo < hi) && (hi <= a.length)}
+     * @throws IllegalArgumentException unless
+     *                                  {@code (0 <= lo) && (lo < hi) && (hi <= a.length)}
      */
     public static void shuffle(Random random, int[] a, int lo, int hi) {
         validateNotNull(a);
         validateSubarrayIndices(lo, hi, a.length);
 
         for (int i = lo; i < hi; i++) {
-            int r = i + uniform(random, hi - i);     // between i and hi-1
+            int r = i + uniform(random, hi - i); // between i and hi-1
             int temp = a[i];
             a[i] = a[r];
             a[r] = temp;
@@ -481,7 +490,7 @@ public class RandomUtils {
      *
      * @param n number of elements
      * @return an array of length {@code n} that is a uniformly random permutation
-     * of {@code 0}, {@code 1}, ..., {@code n-1}
+     *         of {@code 0}, {@code 1}, ..., {@code n-1}
      * @throws IllegalArgumentException if {@code n} is negative
      */
     public static int[] permutation(Random random, int n) {
@@ -502,7 +511,8 @@ public class RandomUtils {
      * @param n number of elements
      * @param k number of elements to select
      * @return an array of length {@code k} that is a uniformly random permutation
-     * of {@code k} of the elements from {@code 0}, {@code 1}, ..., {@code n-1}
+     *         of {@code k} of the elements from {@code 0}, {@code 1}, ...,
+     *         {@code n-1}
      * @throws IllegalArgumentException if {@code n} is negative
      * @throws IllegalArgumentException unless {@code 0 <= k <= n}
      */
@@ -515,12 +525,12 @@ public class RandomUtils {
         }
         int[] perm = new int[k];
         for (int i = 0; i < k; i++) {
-            int r = uniform(random, i + 1);    // between 0 and i
+            int r = uniform(random, i + 1); // between 0 and i
             perm[i] = perm[r];
             perm[r] = i;
         }
         for (int i = k; i < n; i++) {
-            int r = uniform(random, i + 1);    // between 0 and i
+            int r = uniform(random, i + 1); // between 0 and i
             if (r < k) {
                 perm[r] = i;
             }
@@ -540,7 +550,7 @@ public class RandomUtils {
     private static void validateSubarrayIndices(int lo, int hi, int length) {
         if (lo < 0 || hi > length || lo > hi) {
             throw new IllegalArgumentException("subarray indices out of bounds: [" + lo + ", "
-                                               + hi + ")");
+                    + hi + ")");
         }
     }
 }

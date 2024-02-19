@@ -8,20 +8,21 @@ import static org.junit.Assert.*;
 public class TestRoom {
 
     @Test
-    /* ####
-     * #  #
-     * #  #
+    /*
+     * ####
+     * # #
+     * # #
      * ####
      */
     public void testAddRoom() {
-        Position p = new Position(0 , 0);
+        Position p = new Position(0, 0);
         Size size = new Size(4, 4);
         Size worldSize = new Size(4, 4);
         Room r = new Room(p, size);
 
         TETile f = Tileset.FLOOR;
         TETile w = Tileset.WALL;
-        TETile[][] exp = {{w, w, w, w}, {w, f, f, w}, {w, f, f, w}, {w, w, w, w}};
+        TETile[][] exp = { { w, w, w, w }, { w, f, f, w }, { w, f, f, w }, { w, w, w, w } };
 
         Game game = new Game();
         game.createEmptyWorld(worldSize);
