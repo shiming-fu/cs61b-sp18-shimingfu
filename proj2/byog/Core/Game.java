@@ -34,7 +34,7 @@ public class Game {
     void createEmptyWorld(Size size)
     {
         this.size = new Size(size.x,size.y);
-        world = new TETile[size.x][size.y];
+        world = new TETile[size().x][size().y];
         initWorld();
     }
     private void initWorld()
@@ -230,9 +230,14 @@ public class Game {
     return world;
     }
 
+    /**
+     * return the option according to the input
+     * @param input
+     * @return number
+     */
     static int getOption(String input)
     {
-        String regexNew="(?i).*(N[1-9][0-9]*|0)S";
+        String regexNew="(?i).*(N[1-9][0-9]*|0)S.*";
         String regexLoad = "(?i)^L.*";
         String regexSave ="(?i).*(:Q)$";
         if(input.matches(regexNew)) {

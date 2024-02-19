@@ -24,7 +24,7 @@ public class Room {
     /**
      * Add a room to the world
      */
-    void addRoom(TETile[][]world)
+    public void addRoom(TETile[][]world)
     {
         Position boundary = new Position(pos.x + size.x -1,pos.y+size.y-1);
         // up and down
@@ -33,15 +33,16 @@ public class Room {
             world[i][pos.y] = Tileset.WALL;
             world[i][boundary.y] = Tileset.WALL;
         }
+        /*left and right*/
         for(int i = pos.y; i <= boundary.y;i++)
         {
             world[pos.x][i]=Tileset.WALL;
             world[boundary.x][i] = Tileset.WALL;
         }
         /*middle*/
-        for(int i = pos.x + 1;i < boundary.x; i++)
+        for(int i = pos.x + 1;i <= boundary.x-1; i++)
         {
-            for(int j = pos.y + 1; j < boundary.y; j++)
+            for(int j = pos.y + 1; j <= boundary.y-1; j++)
             {
                 world[i][j] = Tileset.FLOOR;
             }
@@ -119,7 +120,7 @@ public class Room {
         {
             for(int j = pos.y+1;j< boundary.y;j++)
             {
-                if(i-1<0||j-1<0 ||i > world.length ||j> world[0].length||world[i][j].character()!=Tileset.NOTHING.character())
+                if(i-1<0||j-1<0 ||i + 1 >= world.length ||j+1>= world[0].length||world[i][j].character()!=Tileset.NOTHING.character())
                 {
                     return true;
                 }

@@ -1,16 +1,33 @@
 package byog.Core;
 
-public class Position {
+public class Position extends Coordinate{
     int x;
     int y;
 
     public Position(int x, int y) {
-        this.x = x;
-        this.y = y;
+        super(x,y);
     }
     Position()
     {
-
+        super();
+    }
+    @Override
+    public boolean equals(Object obj)
+    {
+        if(this == obj)
+        {
+            return true;
+        }
+        if(obj == null)
+        {
+            return false;
+        }
+        if(getClass() != obj.getClass())
+        {
+            return false;
+        }
+        Position other = (Position) obj;
+        return other.x == this.x && other.y==this.y;
     }
 
     /**
