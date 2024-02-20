@@ -1,6 +1,5 @@
 import java.util.HashMap;
 import java.util.Map;
-
 /**
  * This class provides all code necessary to take a query box and produce
  * a query result. The getMapRaster method must return a Map containing all
@@ -8,9 +7,12 @@ import java.util.Map;
  * not draw the output correctly.
  */
 public class Rasterer {
-
+    private boolean query_success;
+    private static final double ROOT_W = MapServer.ROOT_LRLON-MapServer.ROOT_ULLON;
+    private static final double ROOT_H = MapServer.ROOT_ULLAT-MapServer.ROOT_LRLAT;
+    private static final double ROOT_LonDPP = ROOT_W/MapServer.TILE_SIZE;
     public Rasterer() {
-        // YOUR CODE HERE
+        query_success = true;
     }
 
     /**
@@ -42,11 +44,99 @@ public class Rasterer {
      *                    forget to set this to true on success! <br>
      */
     public Map<String, Object> getMapRaster(Map<String, Double> params) {
-        // System.out.println(params);
+         //System.out.println(params);
         Map<String, Object> results = new HashMap<>();
-        System.out.println("Since you haven't implemented getMapRaster, nothing is displayed in "
-                           + "your browser.");
+       double lonDpp = (params.get("lrlon")-params.get("ullon"))/params.get("w");
+       int depth = getDepth(lonDpp);
+       int[] x_range = getXrange(params.get("ullon"), params.get("lrlon"),depth );
+       int[] y_range = getYrange(params.get("ullat"), params.get("lrlat"),depth );
+       //Check for the valid query box
+        if(params.get("ullon")>params.get("lrlon") || params.get("lrlat") > params.get("ullat")
+        |  params.get("lrlon") <= MapServer.ROOT_ULLON || params.get("ullon") >= MapServer.ROOT_LRLON ||
+                params.get("lrlat") >= MapServer.ROOT_ULLAT || params.get("ullat") <= MapServer.ROOT_LRLAT)
+        {
+            query_success = false;
+        }
+        //Fill the map with the keys and values
+        double x_step  = ROOT_W/Math.pow(2,depth);
+        double y_step = ROOT_H/Math.pow(2,depth);
+        String[][] render_grid = getRandomGrid(depth,x_range,y_range);
+        results.put("render_grid",render_grid);
+        results.put("raster_ul_lon",MapServer.ROOT_ULLON + x_range[0]*x_step);
+        results.put("raster_ul_lat",MapServer.ROOT_ULLAT - y_range[0]*y_step);
+        results.put("raster_lr_lon",MapServer.ROOT_ULLON+(1.0+x_range[1])*x_step);
+        results.put("raster_lr_lat",MapServer.ROOT_ULLAT- (1.0 + y_range[1]) * y_step);
+        results.put("depth",depth);
+        results.put("query_success",query_success);
         return results;
     }
 
+    private int getDepth(double req_lonDpp)
+    {
+        int depth = 0;
+        while(ROOT_LonDPP > req_lonDpp)
+        {
+            depth++;
+            req_lonDpp *= 2;
+        }
+        return Math.min(7,depth);
+    }
+    private int[] getXrange(double req_ullon,double req_lrlon,int depth)
+    {
+        int x;
+        int[] res = new int[2];
+        double step = ROOT_W/Math.pow(2,depth);
+        double lrlon  = MapServer.ROOT_ULLON + step;
+        for(x = 0; lrlon < req_ullon;x++)
+        {
+            lrlon += step;
+        }
+        res[0] = x;
+        for(;lrlon<req_lrlon;x++)
+        {
+            lrlon+=step;
+            if( lrlon > MapServer.ROOT_LRLON)
+            {
+                break;
+            }
+        }
+        res[1] = x;
+        return res;
+    }
+    private int[] getYrange(double req_ullat,double req_lrlat,int depth) {
+        int y;
+        int[] res = new int[2];
+        double step = ROOT_H / Math.pow(2, depth);
+        double lrlat = MapServer.ROOT_ULLAT - step;
+        for (y = 0; lrlat > req_ullat;y++)
+        {
+            lrlat -= step;
+        }
+        res[0] = y;
+        for(;lrlat>req_lrlat;y++)
+        {
+            lrlat -= step;
+            if(lrlat < MapServer.ROOT_LRLAT)
+            {
+                break;
+            }
+        }
+        res[1] = y;
+        return res;
+
+    }
+    private String[][] getRandomGrid(int depth, int[] x_range, int[] y_range)
+    {
+        String[][]res = new String[y_range[1]-y_range[0]+1][x_range[1]-x_range[0]+1];
+        for(int j = 0 ; j + y_range[0] <= y_range[1];j++)
+        {
+            for(int k = 0; k + x_range[0] <= x_range[1];k++)
+            {
+                String filename = "d"+Integer.toString(depth)+"_x"+
+                        Integer.toString(k+x_range[0])+"_y"+Integer.toString(j+y_range[0])+".png";
+                res[j][k] = filename;
+            }
+        }
+        return res;
+    }
 }
