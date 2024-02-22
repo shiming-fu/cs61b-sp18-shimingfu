@@ -265,9 +265,6 @@ public class GraphDB {
         }
         return res;
     }
-    public List<String> getLocationsByPrefix(String prefix) {
-        return keysWithPrefix(prefix);
-    }
     /**
      * return a list of words sharing the same prefix
      *
