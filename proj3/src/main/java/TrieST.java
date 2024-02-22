@@ -1,4 +1,13 @@
 import java.util.*;
+
+/**
+ * The TrieST class is used to store Node names for fast searching by prefix
+ * for the Autocomplete feature.
+ *
+ * This uses a 256-way trie for extended ASCII strings.
+ *
+ * Implementation credits: https://algs4.cs.princeton.edu/52trie/TrieST.java.html
+ */
 public class TrieST<Value> {
     private static final int R = 256;        // extended ASCII
 
@@ -136,7 +145,7 @@ public class TrieST<Value> {
 
     /**
      * Returns all of the keys in the symbol table that match {@code pattern},
-     * where the character '.' is interpreted as a wildcard character.
+     * where . symbol is treated as a wildcard character.
      *
      * @param pattern the pattern
      * @return all of the keys in the symbol table that match {@code pattern},
@@ -226,4 +235,3 @@ public class TrieST<Value> {
         return null;
     }
 }
-

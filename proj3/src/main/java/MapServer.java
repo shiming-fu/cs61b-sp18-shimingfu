@@ -14,23 +14,27 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 
-
 /* Maven is used to pull in these dependencies. */
 import com.google.gson.Gson;
 
 import static spark.Spark.*;
 
 /**
- * This MapServer class is the entry point for running the JavaSpark web server for the BearMaps
- * application project, receiving API calls, handling the API call processing, and generating
- * requested images and routes. You should not need to modify this file unless you're
+ * This MapServer class is the entry point for running the JavaSpark web server
+ * for the BearMaps
+ * application project, receiving API calls, handling the API call processing,
+ * and generating
+ * requested images and routes. You should not need to modify this file unless
+ * you're
  * doing the Autocomplete part of the project, though you are welcome to do so.
  * This code is using BearMaps skeleton code version 2.0.
+ *
  * @author Alan Yao, Josh Hug
  */
 public class MapServer {
     /**
-     * The root upper left/lower right longitudes and latitudes represent the bounding box of
+     * The root upper left/lower right longitudes and latitudes represent the
+     * bounding box of
      * the root tile, as the images in the img/ folder are scraped.
      * Longitude == x-axis; latitude == y-axis.
      */
@@ -47,7 +51,8 @@ public class MapServer {
     /** The tile images are in the IMG_ROOT folder. */
     private static final String IMG_ROOT = "../library-sp18/data/proj3_imgs/";
     /**
-     * The OSM XML file path. Downloaded from <a href="http://download.bbbike.org/osm/">here</a>
+     * The OSM XML file path. Downloaded from
+     * <a href="http://download.bbbike.org/osm/">here</a>
      * using custom region selection.
      **/
     private static final String OSM_DB_PATH = "../library-sp18/data/berkeley-2018.osm.xml";
@@ -55,37 +60,46 @@ public class MapServer {
      * Each raster request to the server will have the following parameters
      * as keys in the params map accessible by,
      * i.e., params.get("ullat") inside getMapRaster(). <br>
-     * ullat : upper left corner latitude, <br> ullon : upper left corner longitude, <br>
-     * lrlat : lower right corner latitude,<br> lrlon : lower right corner longitude <br>
-     * w : user viewport window width in pixels,<br> h : user viewport height in pixels.
+     * ullat : upper left corner latitude, <br>
+     * ullon : upper left corner longitude, <br>
+     * lrlat : lower right corner latitude,<br>
+     * lrlon : lower right corner longitude <br>
+     * w : user viewport window width in pixels,<br>
+     * h : user viewport height in pixels.
      **/
-    private static final String[] REQUIRED_RASTER_REQUEST_PARAMS = {"ullat", "ullon", "lrlat",
-        "lrlon", "w", "h"};
+    private static final String[] REQUIRED_RASTER_REQUEST_PARAMS = { "ullat", "ullon", "lrlat",
+            "lrlon", "w", "h" };
     /**
      * Each route request to the server will have the following parameters
      * as keys in the params map.<br>
-     * start_lat : start point latitude,<br> start_lon : start point longitude,<br>
-     * end_lat : end point latitude, <br>end_lon : end point longitude.
+     * start_lat : start point latitude,<br>
+     * start_lon : start point longitude,<br>
+     * end_lat : end point latitude, <br>
+     * end_lon : end point longitude.
      **/
-    private static final String[] REQUIRED_ROUTE_REQUEST_PARAMS = {"start_lat", "start_lon",
-        "end_lat", "end_lon"};
+    private static final String[] REQUIRED_ROUTE_REQUEST_PARAMS = { "start_lat", "start_lon",
+            "end_lat", "end_lon" };
 
     /**
      * The result of rastering must be a map containing all of the
      * fields listed in the comments for getMapRaster in Rasterer.java.
      **/
-    private static final String[] REQUIRED_RASTER_RESULT_PARAMS = {"render_grid", "raster_ul_lon",
-        "raster_ul_lat", "raster_lr_lon", "raster_lr_lat", "depth", "query_success"};
+    private static final String[] REQUIRED_RASTER_RESULT_PARAMS = { "render_grid", "raster_ul_lon",
+            "raster_ul_lat", "raster_lr_lon", "raster_lr_lat", "depth", "query_success" };
 
     private static Rasterer rasterer;
     private static GraphDB graph;
     private static List<Long> route = new LinkedList<>();
-    /* Define any static variables here. Do not define any instance variables of MapServer. */
-
+    /*
+     * Define any static variables here. Do not define any instance variables of
+     * MapServer.
+     */
 
     /**
-     * Place any initialization statements that will be run before the server main loop here.
-     * Do not place it in the main function. Do not place initialization code anywhere else.
+     * Place any initialization statements that will be run before the server main
+     * loop here.
+     * Do not place it in the main function. Do not place initialization code
+     * anywhere else.
      * This is for testing purposes, and you may fail tests otherwise.
      **/
     public static void initialize() {
@@ -96,19 +110,24 @@ public class MapServer {
     public static void main(String[] args) {
         initialize();
         staticFileLocation("/page");
-        /* Allow for all origin requests (since this is not an authenticated server, we do not
-         * care about CSRF).  */
+        /*
+         * Allow for all origin requests (since this is not an authenticated server, we
+         * do not
+         * care about CSRF).
+         */
         before((request, response) -> {
             response.header("Access-Control-Allow-Origin", "*");
             response.header("Access-Control-Request-Method", "*");
             response.header("Access-Control-Allow-Headers", "*");
         });
 
-        /* Define the raster endpoint for HTTP GET requests. I use anonymous functions to define
-         * the request handlers. */
+        /*
+         * Define the raster endpoint for HTTP GET requests. I use anonymous functions
+         * to define
+         * the request handlers.
+         */
         get("/raster", (req, res) -> {
-            HashMap<String, Double> params =
-                    getRequestParams(req, REQUIRED_RASTER_REQUEST_PARAMS);
+            HashMap<String, Double> params = getRequestParams(req, REQUIRED_RASTER_REQUEST_PARAMS);
             /* The png image is written to the ByteArrayOutputStream */
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             /* getMapRaster() does almost all the work for this API call */
@@ -129,8 +148,7 @@ public class MapServer {
 
         /* Define the routing endpoint for HTTP GET requests. */
         get("/route", (req, res) -> {
-            HashMap<String, Double> params =
-                    getRequestParams(req, REQUIRED_ROUTE_REQUEST_PARAMS);
+            HashMap<String, Double> params = getRequestParams(req, REQUIRED_ROUTE_REQUEST_PARAMS);
             route = Router.shortestPath(graph, params.get("start_lon"), params.get("start_lat"),
                     params.get("end_lon"), params.get("end_lat"));
             String directions = getDirectionsText();
@@ -174,7 +192,8 @@ public class MapServer {
     /**
      * Validate & return a parameter map of the required request parameters.
      * Requires that all input parameters are doubles.
-     * @param req HTTP Request.
+     *
+     * @param req            HTTP Request.
      * @param requiredParams TestParams to validate.
      * @return A populated map of input parameter to it's numerical value.
      */
@@ -203,7 +222,7 @@ public class MapServer {
      * we have made this into provided code since it was just a bit too low level.
      */
     private static void writeImagesToOutputStream(Map<String, Object> rasteredImageParams,
-                                                  ByteArrayOutputStream os) {
+            ByteArrayOutputStream os) {
         String[][] renderGrid = (String[][]) rasteredImageParams.get("render_grid");
         int numVertTiles = renderGrid.length;
         int numHorizTiles = renderGrid[0].length;
@@ -225,10 +244,10 @@ public class MapServer {
         }
 
         /* If there is a route, draw it. */
-        double ullon = (double) rasteredImageParams.get("raster_ul_lon"); //tiles.get(0).ulp;
-        double ullat = (double) rasteredImageParams.get("raster_ul_lat"); //tiles.get(0).ulp;
-        double lrlon = (double) rasteredImageParams.get("raster_lr_lon"); //tiles.get(0).ulp;
-        double lrlat = (double) rasteredImageParams.get("raster_lr_lat"); //tiles.get(0).ulp;
+        double ullon = (double) rasteredImageParams.get("raster_ul_lon"); // tiles.get(0).ulp;
+        double ullat = (double) rasteredImageParams.get("raster_ul_lat"); // tiles.get(0).ulp;
+        double lrlon = (double) rasteredImageParams.get("raster_lr_lon"); // tiles.get(0).ulp;
+        double lrlat = (double) rasteredImageParams.get("raster_lr_lat"); // tiles.get(0).ulp;
 
         final double wdpp = (lrlon - ullon) / img.getWidth();
         final double hdpp = (ullat - lrlat) / img.getHeight();
@@ -239,9 +258,9 @@ public class MapServer {
                     BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             route.stream().reduce((v, w) -> {
                 g2d.drawLine((int) ((graph.lon(v) - ullon) * (1 / wdpp)),
-                             (int) ((ullat - graph.lat(v)) * (1 / hdpp)),
-                             (int) ((graph.lon(w) - ullon) * (1 / wdpp)),
-                             (int) ((ullat - graph.lat(w)) * (1 / hdpp)));
+                        (int) ((ullat - graph.lat(v)) * (1 / hdpp)),
+                        (int) ((graph.lon(w) - ullon) * (1 / wdpp)),
+                        (int) ((ullat - graph.lat(w)) * (1 / hdpp)));
                 return w;
             });
         }
@@ -278,34 +297,54 @@ public class MapServer {
     }
 
     /**
-     * In linear time, collect all the names of OSM locations that prefix-match the query string.
-     * @param prefix Prefix string to be searched for. Could be any case, with our without
+     * In linear time, collect all the names of OSM locations that prefix-match the
+     * query string.
+     *
+     * @param prefix Prefix string to be searched for. Could be any case, with our
+     *               without
      *               punctuation.
-     * @return A <code>List</code> of the full names of locations whose cleaned name matches the
-     * cleaned <code>prefix</code>.
+     * @return A <code>List</code> of the full names of locations whose cleaned name
+     *         matches the
+     *         cleaned <code>prefix</code>.
      */
     public static List<String> getLocationsByPrefix(String prefix) {
-        return new LinkedList<>();
+        return graph.keysWithPrefix(prefix);
     }
 
     /**
-     * Collect all locations that match a cleaned <code>locationName</code>, and return
+     * Collect all locations that match a cleaned <code>locationName</code>, and
+     * return
      * information about each node that matches.
+     *
      * @param locationName A full name of a location searched for.
      * @return A list of locations whose cleaned name matches the
-     * cleaned <code>locationName</code>, and each location is a map of parameters for the Json
-     * response as specified: <br>
-     * "lat" : Number, The latitude of the node. <br>
-     * "lon" : Number, The longitude of the node. <br>
-     * "name" : String, The actual name of the node. <br>
-     * "id" : Number, The id of the node. <br>
+     *         cleaned <code>locationName</code>, and each location is a map of
+     *         parameters for the Json
+     *         response as specified: <br>
+     *         "lat" : Number, The latitude of the node. <br>
+     *         "lon" : Number, The longitude of the node. <br>
+     *         "name" : String, The actual name of the node. <br>
+     *         "id" : Number, The id of the node. <br>
      */
     public static List<Map<String, Object>> getLocations(String locationName) {
-        return new LinkedList<>();
+        List<Long>nodes = graph.getLocations(locationName);
+        List<Map<String, Object>> result = new LinkedList<>();
+        for(long v: nodes)
+        {
+            Map<String,Object>nodeInfo = new HashMap<>();
+            nodeInfo.put("lat",graph.locLat(v));
+            nodeInfo.put("lon",graph.locLon(v));
+            nodeInfo.put("name",locationName);
+            nodeInfo.put("id",v);
+            result.add(nodeInfo);
+        }
+        return result;
+
     }
 
     /**
      * Validates that Rasterer has returned a result that can be rendered.
+     *
      * @param rip : Parameters provided by the rasterer
      */
     private static boolean validateRasteredImgParams(Map<String, Object> rip) {
@@ -332,11 +371,11 @@ public class MapServer {
     private static String getDirectionsText() {
         List<Router.NavigationDirection> directions = Router.routeDirections(graph, route);
         if (directions == null || directions.isEmpty()) {
-          return "";
+            return "";
         }
         StringBuilder sb = new StringBuilder();
         int step = 1;
-        for (Router.NavigationDirection d: directions) {
+        for (Router.NavigationDirection d : directions) {
             sb.append(String.format("%d. %s <br>", step, d));
             step += 1;
         }

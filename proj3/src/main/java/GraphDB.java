@@ -9,7 +9,8 @@ import javax.xml.parsers.SAXParserFactory;
 import java.util.*;
 
 /**
- * Graph for storing all of the intersection (vertex) and road (edge) information.
+ * Graph for storing all of the intersection (vertex) and road (edge)
+ * information.
  * Uses your GraphBuildingHandler to convert the XML files into a graph. Your
  * code must include the vertices, adjacent, distance, closest, lat, and lon
  * methods. You'll also need to include instance variables and methods for
@@ -18,15 +19,19 @@ import java.util.*;
  * @author Alan Yao, Josh Hug
  */
 public class GraphDB {
-    /** Your instance variables for storing the graph. You should consider
-     * creating helper classes, e.g. Node, Edge, etc. */
-    private final Map<Long,Location> locations = new HashMap<>();
-    private final Map<Long,Node> nodes = new HashMap<>();
-    private final Map<String,List<Long>>names = new HashMap<>();
+    /**
+     * Your instance variables for storing the graph. You should consider
+     * creating helper classes, e.g. Node, Edge, etc.
+     */
+    private final Map<Long, Location> locations = new HashMap<>();
+    private final Map<Long, Node> nodes = new HashMap<>();
+    private final Map<String, List<Long>> names = new HashMap<>();
     private final TrieST<Long> st = new TrieST<>();
+
     /**
      * Example constructor shows how to create and start an XML parser.
      * You do not need to modify this constructor, but you're welcome to do so.
+     *
      * @param dbPath Path to the XML file to be parsed.
      */
     public GraphDB(String dbPath) {
@@ -46,7 +51,9 @@ public class GraphDB {
     }
 
     /**
-     * Helper to process strings into their "cleaned" form, ignoring punctuation and capitalization.
+     * Helper to process strings into their "cleaned" form, ignoring punctuation and
+     * capitalization.
+     *
      * @param s Input string.
      * @return Cleaned string.
      */
@@ -55,17 +62,16 @@ public class GraphDB {
     }
 
     /**
-     *  Remove nodes with no connections from the graph.
-     *  While this does not guarantee that any two nodes in the remaining graph are connected,
-     *  we can reasonably assume this since typically roads are connected.
+     * Remove nodes with no connections from the graph.
+     * While this does not guarantee that any two nodes in the remaining graph are
+     * connected,
+     * we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-        Iterator<Map.Entry<Long,Node>>nodes_iterator = nodes.entrySet().iterator();
-        while(nodes_iterator.hasNext())
-        {
-            Map.Entry<Long,Node> item = nodes_iterator.next();
-            if(item.getValue().adj.isEmpty())
-            {
+        Iterator<Map.Entry<Long, Node>> nodes_iterator = nodes.entrySet().iterator();
+        while (nodes_iterator.hasNext()) {
+            Map.Entry<Long, Node> item = nodes_iterator.next();
+            if (item.getValue().adj.isEmpty()) {
                 nodes_iterator.remove();
             }
         }
@@ -73,6 +79,7 @@ public class GraphDB {
 
     /**
      * Returns an iterable of all vertex IDs in the graph.
+     *
      * @return An iterable of id's of all vertices in the graph.
      */
     Iterable<Long> vertices() {
@@ -82,6 +89,7 @@ public class GraphDB {
 
     /**
      * Returns ids of all vertices adjacent to v.
+     *
      * @param v The id of the vertex we are looking adjacent to.
      * @return An iterable of the ids of the neighbors of v.
      */
@@ -95,6 +103,7 @@ public class GraphDB {
      * Returns the great-circle distance between vertices v and w in miles.
      * Assumes the lon/lat methods are implemented properly.
      * <a href="https://www.movable-type.co.uk/scripts/latlong.html">Source</a>.
+     *
      * @param v The id of the first vertex.
      * @param w The id of the second vertex.
      * @return The great-circle distance between the two locations from the graph.
@@ -122,6 +131,7 @@ public class GraphDB {
      * end point.
      * Assumes the lon/lat methods are implemented properly.
      * <a href="https://www.movable-type.co.uk/scripts/latlong.html">Source</a>.
+     *
      * @param v The id of the first vertex.
      * @param w The id of the second vertex.
      * @return The initial bearing between the vertices.
@@ -144,6 +154,7 @@ public class GraphDB {
 
     /**
      * Returns the vertex closest to the given longitude and latitude.
+     *
      * @param lon The target longitude.
      * @param lat The target latitude.
      * @return The id of the node in the graph closest to the target.
@@ -151,12 +162,10 @@ public class GraphDB {
     long closest(double lon, double lat) {
         double shortest = Double.MAX_VALUE;
         long ret = -117;
-        for(long id: nodes.keySet())
-        {
+        for (long id : nodes.keySet()) {
             Node x = nodes.get(id);
-            double current_dist = distance(lon,lat,lon(id),lat(id));
-            if(current_dist < shortest)
-            {
+            double current_dist = distance(lon, lat, lon(id), lat(id));
+            if (current_dist < shortest) {
                 ret = id;
                 shortest = current_dist;
             }
@@ -166,6 +175,7 @@ public class GraphDB {
 
     /**
      * Gets the longitude of a vertex.
+     *
      * @param v The id of the vertex.
      * @return The longitude of the vertex.
      */
@@ -175,91 +185,92 @@ public class GraphDB {
 
     /**
      * Gets the latitude of a vertex.
+     *
      * @param v The id of the vertex.
      * @return The latitude of the vertex.
      */
 
-    double locLon(long v)
-    {
+    double locLon(long v) {
         validateLocation(v);
         return locations.get(v).lon;
     }
+
     double lat(long v) {
         return nodes.get(v).lat;
     }
-    double locLat(long v)
-    {
+
+    double locLat(long v) {
         validateLocation(v);
         return locations.get(v).lat;
     }
 
-    String getName(long v)
-    {
+    String getName(long v) {
         validateLocation(v);
         return locations.get(v).name;
     }
-    void addNode(long id,double lon,double lat)
-    {
-        Node node = new Node(lon,lat);
-        nodes.put(id,node);
-    }
 
+    void addNode(long id, double lon, double lat) {
+        Node node = new Node(lon, lat);
+        nodes.put(id, node);
+    }
 
     /**
      * Add nodes to the graph
+     *
      * @param id
      * @param lon
      * @param lac
      * @param name
      */
-    void addLocation(long id,double lon,double lac,String name)
-    {
-        Location loc  = new Location(lon,lac,name);
-        locations.put(id,loc);
+    void addLocation(long id, double lon, double lac, String name) {
+        Location loc = new Location(lon, lac, name);
+        locations.put(id, loc);
     }
 
     /**
      * Adds edge v-w to this graph.
+     *
      * @param v one vertex in the edge
      * @param w another vertex in the edge
      */
-    void addEdge(long v,long w)
-    {
+    void addEdge(long v, long w) {
         validateVertex(v);
         validateVertex(w);
         nodes.get(v).adj.add(w);
         nodes.get(w).adj.add(v);
     }
-    void addName(long id,double lon, double lat, String locationName)
-    {
+
+    void addName(long id, double lon, double lat, String locationName) {
         String cleanedName = cleanString(locationName);
-        if(!names.containsKey(cleanedName))
-        {
-            names.put(cleanedName,new LinkedList<>());
+        if (!names.containsKey(cleanedName)) {
+            names.put(cleanedName, new LinkedList<>());
         }
         names.get(cleanedName).add(id);
-        addLocation(id,lon,lat,locationName);
-        st.put(cleanedName,id);
+        addLocation(id, lon, lat, locationName);
+        st.put(cleanedName, id);
     }
-    void addWay (List<Long>way,String wayname)
-    {
+
+    void addWay(List<Long> way, String wayname) {
         nodes.get(way.get(0)).wayNames.add(wayname);
-        for(int i = 1; i < way.size();i++)
-        {
-            addEdge(way.get(i-1),way.get(i));
+        for (int i = 1; i < way.size(); i++) {
+            addEdge(way.get(i - 1), way.get(i));
             nodes.get(way.get(i)).wayNames.add(wayname);
         }
     }
-    Set<String>getWayNames(long v)
-    {
-        Set<String>res = new HashSet<>();
-        for(String way:nodes.get(v).wayNames){
+
+    Set<String> getWayNames(long v) {
+        Set<String> res = new HashSet<>();
+        for (String way : nodes.get(v).wayNames) {
             res.add(way);
         }
         return res;
     }
+    public List<String> getLocationsByPrefix(String prefix) {
+        return keysWithPrefix(prefix);
+    }
     /**
      * return a list of words sharing the same prefix
+     *
      * @param prefix
      * @return
      */
@@ -273,49 +284,43 @@ public class GraphDB {
         return result;
     }
 
-    public List<Long> getLocations(String locationname)
-    {
+    public List<Long> getLocations(String locationName) {
         List<Long> result = new LinkedList<>();
-        for(long v: names.get(cleanString(locationname)))
-        {
+        for (long v : names.get(cleanString(locationName))) {
             result.add(v);
         }
         return result;
     }
 
-
     /**
      * throw an illegalArgumentException if vertex is not in the graph.
+     *
      * @param v
      */
-    private void validateVertex(long v)
-    {
-        if(!nodes.containsKey(v))
-        {
-            throw new IllegalArgumentException("Vertex" + v +"is not in the graph.");
+    private void validateVertex(long v) {
+        if (!nodes.containsKey(v)) {
+            throw new IllegalArgumentException("Vertex" + v + "is not in the graph.");
         }
     }
 
     /**
      * throw an illegal argument exception if vertex doesn't have a name.
+     *
      * @param v
      */
-    private void validateLocation (long v)
-    {
-        if(!locations.containsKey(v))
-        {
-            throw new IllegalArgumentException("Vertex"+v+"does not have a name.");
+    private void validateLocation(long v) {
+        if (!locations.containsKey(v)) {
+            throw new IllegalArgumentException("Vertex" + v + "does not have a name.");
         }
     }
-    private class Node
-    {
+
+    private class Node {
         double lon;
         double lat;
         List<Long> adj;
         Set<String> wayNames;
 
-        Node(double lon,double lat)
-        {
+        Node(double lon, double lat) {
             this.lon = lon;
             this.lat = lat;
             adj = new LinkedList<>();
@@ -323,13 +328,13 @@ public class GraphDB {
         }
 
     }
-    private class Location
-    {
+
+    private class Location {
         double lon;
         double lat;
         String name = "";
-        Location(double lon,double lat,String name)
-        {
+
+        Location(double lon, double lat, String name) {
             this.lon = lon;
             this.lat = lat;
             this.name = name;
@@ -337,5 +342,3 @@ public class GraphDB {
     }
 
 }
-
-

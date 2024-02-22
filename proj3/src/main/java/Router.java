@@ -3,11 +3,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class provides a shortestPath method for finding routes between two points
- * on the map. Start by using Dijkstra's, and if your code isn't fast enough for your
- * satisfaction (or the autograder), upgrade your implementation by switching it to A*.
- * Your code will probably not be fast enough to pass the autograder unless you use A*.
- * The difference between A* and Dijkstra's is only a couple of lines of code, and boils
+ * This class provides a shortestPath method for finding routes between two
+ * points
+ * on the map. Start by using Dijkstra's, and if your code isn't fast enough for
+ * your
+ * satisfaction (or the autograder), upgrade your implementation by switching it
+ * to A*.
+ * Your code will probably not be fast enough to pass the autograder unless you
+ * use A*.
+ * The difference between A* and Dijkstra's is only a couple of lines of code,
+ * and boils
  * down to the priority you use to order your vertices.
  */
 public class Router {
@@ -24,7 +29,7 @@ public class Router {
      * @return A list of node id's in the order visited on the shortest path.
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
-                                          double destlon, double destlat) {
+            double destlon, double destlat) {
         Map<Long, Long> edgeTo = new HashMap<>();
         Map<Long, Double> distTo = new HashMap<>();
         Set<Long> visited = new HashSet<>();
@@ -36,8 +41,7 @@ public class Router {
             public int compare(Long w, Long v) {
                 double wCost = distTo.get(w) + g.distance(w, dest);
                 double vCost = distTo.get(v) + g.distance(v, dest);
-                if (wCost < vCost)
-                {
+                if (wCost < vCost) {
                     return -1;
                 }
                 if (wCost > vCost) {
@@ -46,15 +50,15 @@ public class Router {
                 return 0;
             }
         });
-        /*Add initial values to edgeTo,distTo,and fringe*/
+        /* Add initial values to edgeTo,distTo,and fringe */
         for (long v : g.vertices()) {
             distTo.put(v, Double.POSITIVE_INFINITY);
             edgeTo.put(v, (long) -117);
         }
-        distTo.replace(src,0.0);
-        edgeTo.put(src,(long)0);
+        distTo.replace(src, 0.0);
+        edgeTo.put(src, (long) 0);
         fringe.add(src);
-        /* A* search algorithm*/
+        /* A* search algorithm */
         while (!fringe.isEmpty()) {
             long curr = fringe.poll();
             if (curr == dest) {
@@ -85,7 +89,7 @@ public class Router {
      * @param route The route to translate into directions. Each element
      *              corresponds to a node from the graph in the route.
      * @return A list of NavigationDirection objects corresponding to the input
-     * route.
+     *         route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
         List<NavigationDirection> result = new ArrayList<>();
@@ -104,24 +108,23 @@ public class Router {
             double currBearing = g.bearing(prevNode, currNode);
             relativeBearing = currBearing - prevBearing;
 
-            /*Get the name of the current way*/
+            /* Get the name of the current way */
             if (prevNode == startNode) {
-                currentWay = getCurrentWay(g,prevNode,currNode);
-            }
-            else {
+                currentWay = getCurrentWay(g, prevNode, currNode);
+            } else {
                 prevBearing = currBearing;
             }
-            if(g.getWayNames(currNode).contains(currentWay) && i !=route.size()-1)
-            {
-                distance += g.distance(prevNode,currNode);
+            if (g.getWayNames(currNode).contains(currentWay) && i != route.size() - 1) {
+                distance += g.distance(prevNode, currNode);
                 continue;
             }
-            /*Add last stretch of distance if reached last node*/
-            if(i == route.size()-1)
-            {
-                distance += g.distance(prevNode,currNode);
+            /* Add last stretch of distance if reached last node */
+            if (i == route.size() - 1) {
+                distance += g.distance(prevNode, currNode);
             }
-            /*Get distance traveled along current way and add nav direction to the result */
+            /*
+             * Get distance traveled along current way and add nav direction to the result
+             */
             NavigationDirection turn = new NavigationDirection();
             turn.direction = currentDirection;
             turn.distance = distance;
@@ -129,51 +132,41 @@ public class Router {
             result.add(turn);
 
             startNode = currNode;
-            distance = g.distance(prevNode,currNode);
+            distance = g.distance(prevNode, currNode);
             currentDirection = getDirection(relativeBearing);
         }
         return result;
     }
-    private static String getCurrentWay(GraphDB g,long v,long w)
-    {
-        for(String a: g.getWayNames(v))
-        {
-            for(String b:g.getWayNames(w))
-            {
-                if(a.equals(b))
-                {
+
+    private static String getCurrentWay(GraphDB g, long v, long w) {
+        for (String a : g.getWayNames(v)) {
+            for (String b : g.getWayNames(w)) {
+                if (a.equals(b)) {
                     return a;
                 }
             }
         }
         return "";
     }
-    private static int getDirection(double relativeBearing)
-    {
+
+    private static int getDirection(double relativeBearing) {
         double absBearing = Math.abs(relativeBearing);
-        if(absBearing>180)
-        {
-            absBearing =360-absBearing;
+        if (absBearing > 180) {
+            absBearing = 360 - absBearing;
             relativeBearing *= -1;
         }
-        if(absBearing<=15)
-        {
+        if (absBearing <= 15) {
             return NavigationDirection.STRAIGHT;
         }
-        if(absBearing<=30)
-        {
-            return relativeBearing < 0 ?NavigationDirection.SLIGHT_LEFT : NavigationDirection.SHARP_RIGHT;
+        if (absBearing <= 30) {
+            return relativeBearing < 0 ? NavigationDirection.SLIGHT_LEFT : NavigationDirection.SLIGHT_RIGHT;
         }
-        if(absBearing<=100)
-        {
+        if (absBearing <= 100) {
             return relativeBearing < 0 ? NavigationDirection.LEFT : NavigationDirection.RIGHT;
-        }
-        else{
+        } else {
             return relativeBearing < 0 ? NavigationDirection.SHARP_LEFT : NavigationDirection.SHARP_RIGHT;
         }
     }
-
-
 
     /**
      * Class to represent a navigation direction, which consists of 3 attributes:
@@ -194,7 +187,7 @@ public class Router {
         /** Number of directions supported. */
         public static final int NUM_DIRECTIONS = 8;
 
-        /** A mapping of integer values to directions.*/
+        /** A mapping of integer values to directions. */
         public static final String[] DIRECTIONS = new String[NUM_DIRECTIONS];
 
         /** Default name for an unknown way. */
@@ -212,7 +205,7 @@ public class Router {
             DIRECTIONS[SHARP_RIGHT] = "Sharp right";
         }
 
-        /** The direction a given NavigationDirection represents.*/
+        /** The direction a given NavigationDirection represents. */
         int direction;
         /** The name of the way I represent. */
         String way;
@@ -234,8 +227,10 @@ public class Router {
         }
 
         /**
-         * Takes the string representation of a navigation direction and converts it into
+         * Takes the string representation of a navigation direction and converts it
+         * into
          * a Navigation Direction object.
+         *
          * @param dirAsString The string representation of the NavigationDirection.
          * @return A NavigationDirection object representing the input string.
          */
@@ -283,8 +278,8 @@ public class Router {
         public boolean equals(Object o) {
             if (o instanceof NavigationDirection) {
                 return direction == ((NavigationDirection) o).direction
-                    && way.equals(((NavigationDirection) o).way)
-                    && distance == ((NavigationDirection) o).distance;
+                        && way.equals(((NavigationDirection) o).way)
+                        && distance == ((NavigationDirection) o).distance;
             }
             return false;
         }
