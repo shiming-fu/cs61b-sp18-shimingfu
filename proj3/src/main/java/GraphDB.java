@@ -180,6 +180,7 @@ public class GraphDB {
      * @return The longitude of the vertex.
      */
     double lon(long v) {
+        validateLocation(v);
         return nodes.get(v).lon;
     }
 
@@ -196,6 +197,7 @@ public class GraphDB {
     }
 
     double lat(long v) {
+        validateLocation(v);
         return nodes.get(v).lat;
     }
 
@@ -219,11 +221,11 @@ public class GraphDB {
      *
      * @param id
      * @param lon
-     * @param lac
+     * @param lat
      * @param name
      */
-    void addLocation(long id, double lon, double lac, String name) {
-        Location loc = new Location(lon, lac, name);
+    void addLocation(long id, double lon, double lat, String name) {
+        Location loc = new Location(lon, lat, name);
         locations.put(id, loc);
     }
 
@@ -250,11 +252,11 @@ public class GraphDB {
         st.put(cleanedName, id);
     }
 
-    void addWay(List<Long> way, String wayname) {
-        nodes.get(way.get(0)).wayNames.add(wayname);
+    void addWay(List<Long> way, String wayName) {
+        nodes.get(way.get(0)).wayNames.add(wayName);
         for (int i = 1; i < way.size(); i++) {
             addEdge(way.get(i - 1), way.get(i));
-            nodes.get(way.get(i)).wayNames.add(wayname);
+            nodes.get(way.get(i)).wayNames.add(wayName);
         }
     }
 
@@ -275,8 +277,8 @@ public class GraphDB {
         List<String> result = new LinkedList<>();
         for (String key : st.keysWithPrefix(cleanString(prefix))) {
             Long id = names.get(key).get(0);
-            String fullname = getName(id);
-            result.add(fullname);
+            String fullName = getName(id);
+            result.add(fullName);
         }
         return result;
     }
@@ -296,7 +298,7 @@ public class GraphDB {
      */
     private void validateVertex(long v) {
         if (!nodes.containsKey(v)) {
-            throw new IllegalArgumentException("Vertex" + v + "is not in the graph.");
+            throw new IllegalArgumentException("Vertex" + v + " is not in the graph.");
         }
     }
 
@@ -307,7 +309,7 @@ public class GraphDB {
      */
     private void validateLocation(long v) {
         if (!locations.containsKey(v)) {
-            throw new IllegalArgumentException("Vertex" + v + "does not have a name.");
+            throw new IllegalArgumentException("Vertex" + v + " does not have a name.");
         }
     }
 
