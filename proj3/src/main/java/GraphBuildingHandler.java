@@ -43,13 +43,9 @@ public class GraphBuildingHandler extends DefaultHandler {
                     "secondary_link", "tertiary_link"));
     private String activeState = "";
     private final GraphDB g;
-    private long id = -117;
-    private double lon = -650;
-    private double lat = -415;
-    private List<Long> ways;
-    private boolean validWay;
-    private String wayName = "";
-
+    private GraphDB.Node curNode;
+    private GraphDB.Way curWay;
+    private List<Long> nodesInCurWay = new ArrayList<>();
     /**
      * Create a new GraphBuildingHandler.
      *
@@ -92,26 +88,35 @@ public class GraphBuildingHandler extends DefaultHandler {
             // System.out.println("Node lat: " + attributes.getValue("lat"));
 
             /* TODO Use the above information to save a "node" to somewhere. */
-            id = Long.parseLong(attributes.getValue("id"));
-            lon = Double.parseDouble(attributes.getValue("lon"));
-            lat = Double.parseDouble(attributes.getValue("lat"));
-            g.addNode(id, lon, lat);
+            long id = Long.parseLong(attributes.getValue("id"));
+            double lon = Double.parseDouble(attributes.getValue("lon"));
+            double lat = Double.parseDouble(attributes.getValue("lat"));
+            GraphDB.Node n = new GraphDB.Node(id,lon,lat);
+            g.addNode(n);
+            curNode = n;
         } else if (qName.equals("way")) {
             /* We encountered a new <way...> tag. */
             activeState = "way";
-            validWay = false;
-            ways = new ArrayList<>();
+            long id = Long.parseLong(attributes.getValue("id"));
+            GraphDB.Way w = new GraphDB.Way(id);
+            g.addWay(w);
+            curWay = w;
             // System.out.println("Beginning a way...");
         } else if (activeState.equals("way") && qName.equals("nd")) {
             /* While looking at a way, we found a <nd...> tag. */
             // System.out.println("Id of a node in this way: " +
             // attributes.getValue("ref"));
-
+            long nodeId = Long.parseLong(attributes.getValue("ref"));
+            nodesInCurWay.add(nodeId);
+            if(!g.getNode(nodeId).wayIds.contains(curWay.id))
+            {
+                g.getNode(nodeId).wayIds.add(curWay.id);
+            }
             /*
              * TODO Use the above id to make "possible" connections between the nodes in
              * this way
              */
-            ways.add(Long.parseLong(attributes.getValue("ref")));
+
 
         } else if (activeState.equals("way") && qName.equals("tag")) {
             /* While looking at a way, we found a <tag...> tag. */
@@ -120,21 +125,34 @@ public class GraphBuildingHandler extends DefaultHandler {
             if (k.equals("maxspeed")) {
                 // System.out.println("Max Speed: " + v);
                 /* TODO set the max speed of the "current way" here. */
+                curWay.maxSpeed = v;
             } else if (k.equals("highway")) {
                 // System.out.println("Highway type: " + v);
                 /* TODO Figure out whether this way and its connections are valid. */
                 if (ALLOWED_HIGHWAY_TYPES.contains(attributes.getValue("v"))) {
-                    validWay = true;
+                    for(int i = 0, j = 1; j < nodesInCurWay.size();i++,j++)
+                    {
+                        Long lastNode = nodesInCurWay.get(i);
+                        Long node = nodesInCurWay.get(j);
+                        g.addAdj(lastNode,node);
+                        g.addAdj(node,lastNode);
+                    }
                 }
             } else if (k.equals("name")) {
                 // System.out.println("Way Name: " + v);
-                wayName = v;
+                curWay.name = v;
             }
             // System.out.println("Tag with k=" + k + ", v=" + v + ".");
         } else if (activeState.equals("node") && qName.equals("tag") && attributes.getValue("k").equals("name")) {
             /* While looking at a node, we found a <tag...> with k="name". */
             /* TODO Create a location. */
-            g.addName(id, lon, lat, attributes.getValue("v"));
+            String name = attributes.getValue("v");
+            String cleanname = GraphDB.cleanString(name);
+            g.addCleanNameToTrie(cleanname,name);
+            GraphDB.NameNode nameNode = new GraphDB.NameNode(curNode.id,curNode.lon,curNode.lat,name);
+            g.addNameNode(nameNode);
+            g.addLocation(name,curNode.id);
+            g.addLocation(cleanname,curNode.id);
             // System.out.println("Node's name: " + attributes.getValue("v"));
         }
     }
@@ -162,9 +180,7 @@ public class GraphBuildingHandler extends DefaultHandler {
              * We are done looking at a way. (We finished looking at the nodes, speeds,
              * etc...)
              */
-            if (validWay) {
-                g.addWay(ways, wayName);
-            }
+            nodesInCurWay = new ArrayList<>();
             // System.out.println("Finishing a way...");
 
         }

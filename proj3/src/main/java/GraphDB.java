@@ -1,16 +1,26 @@
-import org.xml.sax.SAXException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.util.*;
+
+import org.xml.sax.SAXException;
 
 /**
- * Graph for storing all of the intersection (vertex) and road (edge)
- * information.
+ * Graph for storing all of the intersection (vertex) and road (edge) information.
  * Uses your GraphBuildingHandler to convert the XML files into a graph. Your
  * code must include the vertices, adjacent, distance, closest, lat, and lon
  * methods. You'll also need to include instance variables and methods for
@@ -20,13 +30,16 @@ import java.util.*;
  */
 public class GraphDB {
     /**
-     * Your instance variables for storing the graph. You should consider
-     * creating helper classes, e.g. Node, Edge, etc.
+     * Your instance variables for storing the graph. You should consider creating
+     * helper classes, e.g. Node, Edge, etc.
      */
-    private final Map<Long, Location> locations = new HashMap<>();
-    private final Map<Long, Node> nodes = new HashMap<>();
-    private final Map<String, List<Long>> names = new HashMap<>();
-    private final TrieST<Long> st = new TrieST<>();
+
+    private final Map<Long, Node> nodes = new LinkedHashMap<>();
+    private final Map<Long, Way> ways = new LinkedHashMap<>();
+    private final Trie trieForNodeName = new Trie();
+    private final Map<Long, NameNode> nameNodes = new LinkedHashMap<>();
+    private final Map<String, List<Long>> locations = new LinkedHashMap<>();
+    private final KdTree kdTreeForNearestNeighbor = new KdTree();
 
     /**
      * Example constructor shows how to create and start an XML parser.
@@ -48,11 +61,14 @@ public class GraphDB {
             e.printStackTrace();
         }
         clean();
+
+        for (long node : nodes.keySet()) {
+            addToKdTree(nodes.get(node));
+        }
     }
 
     /**
-     * Helper to process strings into their "cleaned" form, ignoring punctuation and
-     * capitalization.
+     * Helper to process strings into their "cleaned" form, ignoring punctuation and capitalization.
      *
      * @param s Input string.
      * @return Cleaned string.
@@ -63,16 +79,16 @@ public class GraphDB {
 
     /**
      * Remove nodes with no connections from the graph.
-     * While this does not guarantee that any two nodes in the remaining graph are
-     * connected,
+     * While this does not guarantee that any two nodes in the remaining graph are connected,
      * we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-        Iterator<Map.Entry<Long, Node>> nodes_iterator = nodes.entrySet().iterator();
-        while (nodes_iterator.hasNext()) {
-            Map.Entry<Long, Node> item = nodes_iterator.next();
-            if (item.getValue().adj.isEmpty()) {
-                nodes_iterator.remove();
+        //use iterator
+        Iterator<Long> it = nodes.keySet().iterator();
+        while (it.hasNext()) {
+            Long node = it.next();
+            if (nodes.get(node).adjs.isEmpty()) {
+                it.remove();
             }
         }
     }
@@ -83,7 +99,6 @@ public class GraphDB {
      * @return An iterable of id's of all vertices in the graph.
      */
     Iterable<Long> vertices() {
-
         return nodes.keySet();
     }
 
@@ -94,9 +109,7 @@ public class GraphDB {
      * @return An iterable of the ids of the neighbors of v.
      */
     Iterable<Long> adjacent(long v) {
-
-        validateVertex(v);
-        return nodes.get(v).adj;
+        return nodes.get(v).adjs;
     }
 
     /**
@@ -160,17 +173,7 @@ public class GraphDB {
      * @return The id of the node in the graph closest to the target.
      */
     long closest(double lon, double lat) {
-        double shortest = Double.MAX_VALUE;
-        long ret = -117;
-        for (long id : nodes.keySet()) {
-            Node x = nodes.get(id);
-            double current_dist = distance(lon, lat, lon(id), lat(id));
-            if (current_dist < shortest) {
-                ret = id;
-                shortest = current_dist;
-            }
-        }
-        return ret;
+        return kdTreeForNearestNeighbor.nearest(lon, lat);
     }
 
     /**
@@ -180,7 +183,6 @@ public class GraphDB {
      * @return The longitude of the vertex.
      */
     double lon(long v) {
-        validateLocation(v);
         return nodes.get(v).lon;
     }
 
@@ -190,154 +192,185 @@ public class GraphDB {
      * @param v The id of the vertex.
      * @return The latitude of the vertex.
      */
-
-    double locLon(long v) {
-        validateLocation(v);
-        return locations.get(v).lon;
-    }
-
     double lat(long v) {
-        validateLocation(v);
         return nodes.get(v).lat;
     }
 
-    double locLat(long v) {
-        validateLocation(v);
-        return locations.get(v).lat;
-    }
-
-    String getName(long v) {
-        validateLocation(v);
-        return locations.get(v).name;
-    }
-
-    void addNode(long id, double lon, double lat) {
-        Node node = new Node(lon, lat);
-        nodes.put(id, node);
+    /**
+     * Add a node to the graph.
+     *
+     * @param n node
+     */
+    void addNode(Node n) {
+        nodes.put(n.id, n);
     }
 
     /**
-     * Add nodes to the graph
+     * Add a way to the graph.
      *
-     * @param id
-     * @param lon
-     * @param lat
-     * @param name
+     * @param w way
      */
-    void addLocation(long id, double lon, double lat, String name) {
-        Location loc = new Location(lon, lat, name);
-        locations.put(id, loc);
+    void addWay(Way w) {
+        ways.put(w.id, w);
     }
 
-    /**
-     * Adds edge v-w to this graph.
-     *
-     * @param v one vertex in the edge
-     * @param w another vertex in the edge
-     */
-    void addEdge(long v, long w) {
-        validateVertex(v);
-        validateVertex(w);
-        nodes.get(v).adj.add(w);
-        nodes.get(w).adj.add(v);
+    void addAdj(Long node1, Long node2) {
+        nodes.get(node1).adjs.add(node2);
     }
 
-    void addName(long id, double lon, double lat, String locationName) {
-        String cleanedName = cleanString(locationName);
-        if (!names.containsKey(cleanedName)) {
-            names.put(cleanedName, new LinkedList<>());
+    public void addToKdTree(GraphDB.Node n) {
+        kdTreeForNearestNeighbor.insert(n);
+    }
+
+    public void addCleanNameToTrie(String cleanName, String name) {
+        trieForNodeName.add(cleanName, name);
+    }
+
+    public List<String> collectFromTrie(String prefix) {
+        Trie.TrieNode prefixEnd = trieForNodeName.findNode(prefix);
+        List<String> res = new ArrayList<>();
+        if (prefixEnd == null) {
+            return res;
         }
-        names.get(cleanedName).add(id);
-        addLocation(id, lon, lat, locationName);
-        st.put(cleanedName, id);
-    }
-
-    void addWay(List<Long> way, String wayName) {
-        nodes.get(way.get(0)).wayNames.add(wayName);
-        for (int i = 1; i < way.size(); i++) {
-            addEdge(way.get(i - 1), way.get(i));
-            nodes.get(way.get(i)).wayNames.add(wayName);
+        if (prefixEnd.isWord()) {
+            res.addAll(prefixEnd.getNames());
         }
-    }
-
-    Set<String> getWayNames(long v) {
-        Set<String> res = new HashSet<>();
-        for (String way : nodes.get(v).wayNames) {
-            res.add(way);
+        for (char c : prefixEnd.getChildren().keySet()) {
+            colHelper(prefix + c, res, prefixEnd.getChildren().get(c));
         }
         return res;
     }
-    /**
-     * return a list of words sharing the same prefix
-     *
-     * @param prefix
-     * @return
-     */
-    public List<String> keysWithPrefix(String prefix) {
-        List<String> result = new LinkedList<>();
-        for (String key : st.keysWithPrefix(cleanString(prefix))) {
-            Long id = names.get(key).get(0);
-            String fullName = getName(id);
-            result.add(fullName);
-        }
-        return result;
-    }
 
-    public List<Long> getLocations(String locationName) {
-        List<Long> result = new LinkedList<>();
-        for (long v : names.get(cleanString(locationName))) {
-            result.add(v);
+    private void colHelper(String s, List<String> res, Trie.TrieNode node) {
+        if (node.isWord()) {
+            res.addAll(node.getNames());
         }
-        return result;
-    }
-
-    /**
-     * throw an illegalArgumentException if vertex is not in the graph.
-     *
-     * @param v
-     */
-    private void validateVertex(long v) {
-        if (!nodes.containsKey(v)) {
-            throw new IllegalArgumentException("Vertex" + v + " is not in the graph.");
+        for (char c : node.getChildren().keySet()) {
+            colHelper(s + c, res, node.getChildren().get(c));
         }
     }
 
-    /**
-     * throw an illegal argument exception if vertex doesn't have a name.
-     *
-     * @param v
-     */
-    private void validateLocation(long v) {
-        if (!locations.containsKey(v)) {
-            throw new IllegalArgumentException("Vertex" + v + " does not have a name.");
+    public void addLocation(String name, long id) {
+        if (locations.containsKey(name)) {
+            locations.get(name).add(id);
+        } else {
+            locations.put(name, new ArrayList<>(Arrays.asList(id)));
         }
     }
 
-    private class Node {
+    public List<String> getLocationsByPrefix(String prefix) {
+        return collectFromTrie(prefix);
+    }
+
+    public List<Map<String, Object>> getLocations(String locationName) {
+        List<Map<String, Object>> res = new LinkedList<>();
+        if (!locations.containsKey(locationName)) {
+            return res;
+        }
+        for (long id : locations.get(locationName)) {
+            res.add(getNameNodeAsMap(id));
+        }
+        return res;
+    }
+
+    static class Node {
+        long id;
         double lon;
         double lat;
-        List<Long> adj;
-        Set<String> wayNames;
+        // Map<String, String> extraInfo;
+        Set<Long> adjs;
+        double priority = 0;
+        double distTo = 0;
+        List<Long> wayIds;
 
-        Node(double lon, double lat) {
+        Node(long id, double lon, double lat) {
+            this.id = id;
             this.lon = lon;
             this.lat = lat;
-            adj = new LinkedList<>();
-            wayNames = new HashSet<>();
+            // this.extraInfo = new HashMap<>();
+            this.adjs = new LinkedHashSet<>();
+            this.wayIds = new ArrayList<>();
+        }
+    }
+
+    public double getDistTo(long v) {
+        return nodes.get(v).distTo;
+    }
+
+    public void changeDistTo(long v, double newDistTo) {
+        nodes.get(v).distTo = newDistTo;
+    }
+
+    public void changePriority(long v, double newPriority) {
+        nodes.get(v).priority = newPriority;
+    }
+
+    class NodeComparator implements Comparator<Long> {
+        @Override
+        public int compare(Long v, Long w) {
+            return Double.compare(nodes.get(v).priority, nodes.get(w).priority);
+        }
+    }
+
+    public Comparator<Long> getNodeComparator() {
+        return new NodeComparator();
+    }
+
+    public Node getNode(long nodeId) {
+        return nodes.get(nodeId);
+    }
+
+    static class Way {
+        long id;
+        String maxSpeed;
+        String name;
+        String highway;
+        List<Long> locations;
+
+        Way(long id) {
+            this.id = id;
+            this.locations = new ArrayList<>();
         }
 
     }
 
-    private class Location {
+    public List<Long> getWays(long nodeId) {
+        return nodes.get(nodeId).wayIds;
+    }
+
+    public String getWayName(long wayId) {
+        return ways.get(wayId).name;
+    }
+
+    static class NameNode {
+        long id;
         double lon;
         double lat;
-        String name = "";
+        String name;
 
-        Location(double lon, double lat, String name) {
+        public NameNode(long id, double lon, double lat, String name) {
+            this.id = id;
             this.lon = lon;
             this.lat = lat;
             this.name = name;
         }
     }
 
+    public void addNameNode(NameNode n) {
+        nameNodes.put(n.id, n);
+    }
+
+    public String getNodeName(long id) {
+        return nameNodes.get(id).name;
+    }
+
+    public Map<String, Object> getNameNodeAsMap(long id) {
+        NameNode n = nameNodes.get(id);
+        Map<String, Object> res = new HashMap<>();
+        res.put("id", n.id);
+        res.put("lat", n.lat);
+        res.put("lon", n.lon);
+        res.put("name", n.name);
+        return res;
+    }
 }

@@ -1,6 +1,7 @@
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This class provides a shortestPath method for finding routes between two
@@ -29,58 +30,69 @@ public class Router {
      * @return A list of node id's in the order visited on the shortest path.
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
-            double destlon, double destlat) {
+                                          double destlon,double destlat ) {
         Map<Long, Long> edgeTo = new HashMap<>();
-        Map<Long, Double> distTo = new HashMap<>();
+
         Set<Long> visited = new HashSet<>();
-        List<Long> route = new LinkedList<>();
-        long src = g.closest(stlon, stlat);
-        long dest = g.closest(destlon, destlat);
-        PriorityQueue<Long> fringe = new PriorityQueue<Long>(new Comparator<Long>() {
-            @Override
-            public int compare(Long w, Long v) {
-                double wCost = distTo.get(w) + g.distance(w, dest);
-                double vCost = distTo.get(v) + g.distance(v, dest);
-                if (wCost < vCost) {
-                    return -1;
-                }
-                if (wCost > vCost) {
-                    return 1;
-                }
-                return 0;
-            }
-        });
-        /* Add initial values to edgeTo,distTo,and fringe */
-        for (long v : g.vertices()) {
-            distTo.put(v, Double.POSITIVE_INFINITY);
-            edgeTo.put(v, (long) -117);
+        long stNode = g.closest(stlon, stlat);
+        long destNode = g.closest(destlon, destlat);
+        PriorityQueue<Long> pq = new PriorityQueue<>(g.getNodeComparator());
+        for(long node: g.vertices())
+        {
+            g.changeDistTo(node,Double.POSITIVE_INFINITY);
         }
-        distTo.replace(src, 0.0);
-        edgeTo.put(src, (long) 0);
-        fringe.add(src);
-        /* A* search algorithm */
-        while (!fringe.isEmpty()) {
-            long curr = fringe.poll();
-            if (curr == dest) {
+        g.changeDistTo(stNode,0);
+        pq.add(stNode);
+        while(!pq.isEmpty())
+        {
+            long v = pq.poll();
+            if(visited.contains(v))
+            {
+                continue;
+            }
+            if(v == destNode)
+            {
                 break;
             }
-            if (!visited.contains(curr)) {
-                visited.add(curr);
-                for (long neighbor : g.adjacent(curr)) {
-                    double distance = distTo.get(curr) + g.distance(curr, neighbor);
-                    if (distance < distTo.get(neighbor)) {
-                        distTo.put(neighbor, distance);
-                        edgeTo.put(neighbor, curr);
-                        fringe.add(neighbor);
-                    }
-                }
+            visited.add(v);
+            for(long w : g.adjacent(v))
+            {
+                relax(g,edgeTo,pq,v,w,destNode);
             }
         }
-        for (long e = dest; e != 0; e = edgeTo.get(e)) {
-            route.add(0, e);
+        List<Long>res = new LinkedList<>();
+        res.add(destNode);
+        while(destNode != stNode)
+        {
+            //can not reach destNode
+            if(edgeTo.get(destNode) == null)
+            {
+                return new LinkedList<>();
+            }
+            res.add(0, edgeTo.get(destNode));
+            destNode = edgeTo.get(destNode);
         }
-        return route;
+        //clean
+        for(Long node:g.vertices())
+        {
+            g.changePriority(node,0);
+        }
+        return res;
     }
+    private static void relax(GraphDB g,Map<Long,Long>edgeTo,PriorityQueue<Long>pq,long v,long w,long destNode)
+    {
+        //dijkstra
+        if(g.getDistTo(v) + g.distance(v,w) < g.getDistTo(w)) {
+            g.changeDistTo(w, g.getDistTo(v) + g.distance(v, w));
+
+            /* A* search*/
+            g.changePriority(w, g.getDistTo(w) + g.distance(w, destNode));
+            pq.add(w);
+
+            edgeTo.put(w, v);
+        }
+    }
+
 
     /**
      * Create the list of directions corresponding to a route on the graph.
@@ -92,64 +104,55 @@ public class Router {
      *         route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
-        List<NavigationDirection> result = new ArrayList<>();
-        long startNode = route.get(0);
-        double distance = 0;
-        double relativeBearing = 0;
-        double prevBearing = g.bearing(route.get(0), route.get(1));
-        int currentDirection = NavigationDirection.START;
-        String currentWay = "";
-        if (route.size() < 2) {
-            return null;
-        }
-        for (int i = 1; i < route.size(); i++) {
-            long prevNode = route.get(i - 1);
-            long currNode = route.get(i);
-            double currBearing = g.bearing(prevNode, currNode);
-            relativeBearing = currBearing - prevBearing;
+        List<NavigationDirection> res = new ArrayList<>();
 
-            /* Get the name of the current way */
-            if (prevNode == startNode) {
-                currentWay = getCurrentWay(g, prevNode, currNode);
-            } else {
-                prevBearing = currBearing;
-            }
-            if (g.getWayNames(currNode).contains(currentWay) && i != route.size() - 1) {
-                distance += g.distance(prevNode, currNode);
+        NavigationDirection cur = new NavigationDirection();
+        cur.direction = NavigationDirection.START;
+        cur.way = getWayName(g, route.get(0), route.get(1));
+        cur.distance += g.distance(route.get(0), route.get(1));
+
+        for (int i = 1, j = 2; j < route.size(); i++, j++) {
+            if (! getWayName(g, route.get(i), route.get(j)).equals(cur.way)) {
+                res.add(cur);
+                cur = new NavigationDirection();
+                cur.way =  getWayName(g, route.get(i), route.get(j));
+
+                double prevBearing = g.bearing(route.get(i - 1), route.get(i));
+                double curBearing = g.bearing(route.get(i), route.get(j));
+                cur.direction = getDirection(prevBearing, curBearing);
+
+                cur.distance += g.distance(route.get(i), route.get(j));
                 continue;
             }
-            /* Add last stretch of distance if reached last node */
-            if (i == route.size() - 1) {
-                distance += g.distance(prevNode, currNode);
-            }
-            /*
-             * Get distance traveled along current way and add nav direction to the result
-             */
-            NavigationDirection turn = new NavigationDirection();
-            turn.direction = currentDirection;
-            turn.distance = distance;
-            turn.way = currentWay;
-            result.add(turn);
-
-            startNode = currNode;
-            distance = g.distance(prevNode, currNode);
-            currentDirection = getDirection(relativeBearing);
+            cur.distance += g.distance(route.get(i), route.get(j));
         }
-        return result;
+        res.add(cur);
+        return res;
     }
 
-    private static String getCurrentWay(GraphDB g, long v, long w) {
-        for (String a : g.getWayNames(v)) {
-            for (String b : g.getWayNames(w)) {
-                if (a.equals(b)) {
-                    return a;
-                }
+    private static String getWayName(GraphDB g, long v, long w) {
+        String noName = "";
+
+        List<Long> ways1 = g.getWays(v);
+        List<Long> ways2 = g.getWays(w);
+
+        // intersection
+        List<Long> intersection =
+                ways1.stream().filter(ways2::contains).collect(Collectors.toList());
+
+        if (!intersection.isEmpty()) {
+            if (g.getWayName(intersection.get(0)) == null) {
+                return noName;
+            } else {
+                return g.getWayName(intersection.get(0));
             }
         }
-        return "";
+
+        return noName;
     }
 
-    private static int getDirection(double relativeBearing) {
+    private static int getDirection(double prevBearing,double currBearing) {
+        double relativeBearing = currBearing - prevBearing;
         double absBearing = Math.abs(relativeBearing);
         if (absBearing > 180) {
             absBearing = 360 - absBearing;
